@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proativa Solutions | Apps em AppSheet e Planilhas Inteligentes</title>
+  <title>Proativa Solutions | Soluções Inteligentes com Apps, Dashboards e Automações</title>
   
   <!-- ==========================================
        ESTILOS VISUAIS (CSS)
        ========================================== -->
   <style>
+    /* Reset básico e tipografia */
     * {
       box-sizing: border-box;
       margin: 0;
@@ -25,34 +26,36 @@
     /* Cabeçalho / Navegação */
     header {
       background-color: #ffffff;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
       position: sticky;
       top: 0;
       z-index: 100;
     }
 
     .nav-container {
-      max-width: 1100px;
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
+      padding: 15px 24px;
     }
 
+    /* Logo Ajustada e Destacada */
     .logo img {
-      max-height: 45px;
+      height: 65px; /* Tamanho aumentado para melhor visibilidade */
       width: auto;
+      display: block;
     }
 
     .btn-header {
       background-color: #2563eb;
       color: white;
-      padding: 10px 20px;
-      border-radius: 6px;
+      padding: 12px 24px;
+      border-radius: 8px;
       text-decoration: none;
-      font-weight: bold;
-      font-size: 14px;
+      font-weight: 600;
+      font-size: 15px;
       transition: background 0.3s;
     }
 
@@ -65,36 +68,49 @@
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: white;
       text-align: center;
-      padding: 80px 20px;
+      padding: 90px 20px;
     }
 
     .hero-content {
-      max-width: 800px;
+      max-width: 850px;
       margin: 0 auto;
     }
 
+    .badge-nuvem {
+      display: inline-block;
+      background: rgba(37, 99, 235, 0.2);
+      color: #60a5fa;
+      border: 1px solid rgba(96, 165, 250, 0.3);
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
     .hero h1 {
-      font-size: 36px;
+      font-size: 38px;
       margin-bottom: 20px;
       font-weight: 700;
+      line-height: 1.25;
     }
 
     .hero p {
-      font-size: 18px;
+      font-size: 19px;
       color: #94a3b8;
       margin-bottom: 35px;
     }
 
     .btn-cta {
       display: inline-block;
-      background-color: #25d366; /* Verde chamativo */
+      background-color: #25d366; /* Verde chamativo estilo WhatsApp */
       color: white;
-      padding: 16px 32px;
+      padding: 16px 36px;
       border-radius: 8px;
       text-decoration: none;
       font-size: 18px;
       font-weight: bold;
-      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+      box-shadow: 0 4px 15px rgba(37, 211, 102, 0.35);
       transition: transform 0.2s, background 0.3s;
     }
 
@@ -103,43 +119,56 @@
       transform: translateY(-2px);
     }
 
-    /* Secção de Serviços */
+    /* Secção de Soluções */
     .services {
-      max-width: 1100px;
-      margin: 60px auto;
-      padding: 0 20px;
+      max-width: 1200px;
+      margin: 70px auto;
+      padding: 0 24px;
     }
 
     .section-title {
       text-align: center;
-      font-size: 28px;
+      font-size: 30px;
       color: #0f172a;
-      margin-bottom: 40px;
+      margin-bottom: 15px;
+    }
+
+    .section-subtitle {
+      text-align: center;
+      color: #64748b;
+      margin-bottom: 45px;
+      font-size: 16px;
     }
 
     .grid-services {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 30px;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
     }
 
     .card-service {
       background: white;
-      padding: 30px;
+      padding: 32px;
       border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
       border: 1px solid #e2e8f0;
-      transition: transform 0.3s;
+      transition: transform 0.3s, box-shadow 0.3s;
     }
 
     .card-service:hover {
       transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .icon-box {
+      font-size: 36px;
+      margin-bottom: 15px;
     }
 
     .card-service h3 {
-      color: #2563eb;
+      color: #0f172a;
       font-size: 20px;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
     }
 
     .card-service p {
@@ -147,14 +176,88 @@
       font-size: 15px;
     }
 
+    /* Secção Fale Conosco */
+    .contact-section {
+      background-color: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 70px 24px;
+      margin-top: 60px;
+    }
+
+    .contact-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .grid-contact {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+
+    .card-contact {
+      background: #f8fafc;
+      padding: 30px;
+      border-radius: 12px;
+      border: 1px solid #cbd5e1;
+      text-align: center;
+    }
+
+    .card-contact h4 {
+      font-size: 18px;
+      color: #0f172a;
+      margin-bottom: 10px;
+    }
+
+    .card-contact p {
+      color: #475569;
+      font-size: 16px;
+      margin-bottom: 18px;
+      font-weight: 600;
+    }
+
+    .btn-contact-action {
+      display: inline-block;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .btn-wa {
+      background-color: #25d366;
+      color: white;
+    }
+
+    .btn-wa:hover {
+      background-color: #1ebc57;
+    }
+
+    .btn-email {
+      background-color: #2563eb;
+      color: white;
+    }
+
+    .btn-email:hover {
+      background-color: #1d4ed8;
+    }
+
     /* Rodapé */
     footer {
       background-color: #0f172a;
-      color: #64748b;
+      color: #94a3b8;
       text-align: center;
-      padding: 30px 20px;
-      margin-top: 80px;
+      padding: 35px 20px;
       font-size: 14px;
+    }
+
+    footer p {
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -164,7 +267,7 @@
   <header>
     <div class="nav-container">
       <div class="logo">
-        <img src="https://lh3.googleusercontent.com/d/1dOP4me2iiAevZzWTrzcWtHhpkO2OaJdF" alt="Proativa Solutions">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions">
       </div>
       <a href="briefing.html" class="btn-header">Solicitar Projeto</a>
     </div>
@@ -173,30 +276,65 @@
   <!-- DESTAQUE PRINCIPAL (HERO) -->
   <section class="hero">
     <div class="hero-content">
-      <h1>Transformamos a sua operação com Apps sob medida e Planilhas Inteligentes</h1>
-      <p>Desenvolvemos soluções personalizadas em AppSheet e automações para otimizar o dia a dia do seu negócio de forma rápida e eficiente.</p>
+      <span class="badge-nuvem">☁️️ 100% na Nuvem & Multiplataforma</span>
+      <h1>Soluções Inteligentes para Otimizar o seu Negócio</h1>
+      <p>Desenvolvemos aplicativos sob medida, dashboards interativos e automações de processos acessíveis a qualquer momento em celulares, tablets e notebooks.</p>
       <a href="briefing.html" class="btn-cta">Descrever Meu Projeto Agora</a>
     </div>
   </section>
 
-  <!-- SERVIÇOS -->
+  <!-- SERVIÇOS & SOLUÇÕES -->
   <section class="services">
-    <h2 class="section-title">Nossas Soluções</h2>
-    
+    <h2 class="section-title">O que Desenvolvemos para Você</h2>
+    <p class="section-subtitle">Aumente a produtividade e elimine tarefas manuais com tecnologia moderna e sob medida.</p>
+
     <div class="grid-services">
       <div class="card-service">
-        <h3>📱 Aplicativos em AppSheet</h3>
-        <p>Criação de aplicativos móveis e web sob medida para gestão de estoque, equipes de campo, vendas, chamados e processos internos sem complicações.</p>
+        <div class="icon-box">📱</div>
+        <h3>Apps Personalizados</h3>
+        <p>Aplicativos sob medida para gestão operacional, controle de estoque, equipes de campo e vendas, funcionando perfeitamente em dispositivos móveis e computadores.</p>
       </div>
 
       <div class="card-service">
-        <h3>📊 Planilhas Inteligentes</h3>
-        <p>Desenvolvimento e otimização de planilhas com automações, dashboards dinâmicos e integração de dados para tomadas de decisão rápidas.</p>
+        <div class="icon-box">📊</div>
+        <h3>Dashboards Inteligentes</h3>
+        <p>Painéis de controle visuais e em tempo real para acompanhamento de indicadores (KPIs), métricas de desempenho e tomada de decisão estratégica.</p>
       </div>
 
       <div class="card-service">
-        <h3>⚙️ Automação de Processos</h3>
-        <p>Elimine tarefas manuais repetitivas integrando seus formulários, e-mails e bancos de dados em um fluxo de trabalho automatizado.</p>
+        <div class="icon-box">⚙️</div>
+        <h3>Automação de Processos</h3>
+        <p>Elimine rotinas repetitivas conectando seus fluxos de trabalho, e-mails e formulários para um funcionamento automático e sem erros humanos.</p>
+      </div>
+
+      <div class="card-service">
+        <div class="icon-box">☁️</div>
+        <h3>Acesso na Nuvem 24/7</h3>
+        <p>Acesse suas informações e gerencie sua empresa de qualquer lugar, a qualquer hora, com dados sincronizados e hospedados com segurança na nuvem.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SEÇÃO FALE CONOSCO -->
+  <section class="contact-section">
+    <div class="contact-container">
+      <h2 class="section-title">Fale Conosco</h2>
+      <p class="section-subtitle">Tem alguma dúvida ou quer entender como podemos ajudar o seu negócio? Entre em contato direto conosco!</p>
+
+      <div class="grid-contact">
+        <!-- Card WhatsApp -->
+        <div class="card-contact">
+          <h4>💬 Atendimento via WhatsApp</h4>
+          <p>(83) 92146-8797</p>
+          <a href="https://wa.me/5583921468797?text=Olá!%20Gostaria%20de%20saber%20mais%20sobre%20as%20soluções%20da%20Proativa%20Solutions." target="_blank" class="btn-contact-action btn-wa">Iniciar Conversa</a>
+        </div>
+
+        <!-- Card E-mail -->
+        <div class="card-contact">
+          <h4>✉️ E-mail de Contato</h4>
+          <p>solutionsproativa@gmail.com</p>
+          <a href="mailto:solutionsproativa@gmail.com?subject=Contato%20via%20Site%20-%20Proativa%20Solutions" class="btn-contact-action btn-email">Enviar E-mail</a>
+        </div>
       </div>
     </div>
   </section>
@@ -204,6 +342,7 @@
   <!-- RODAPÉ -->
   <footer>
     <p>&copy; 2026 Proativa Solutions. Todos os direitos reservados.</p>
+    <p>Soluções Inteligentes com Apps, Dashboards e Automações.</p>
   </footer>
 
 </body>
