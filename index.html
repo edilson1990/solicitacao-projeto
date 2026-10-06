@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proativa Solutions | Apps em AppSheet e Planilhas Inteligentes</title>
+  
+  <!-- ==========================================
+       ESTILOS VISUAIS (CSS)
+       ========================================== -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+
+    /* Cabeçalho / Navegação */
+    header {
+      background-color: #ffffff;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .nav-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+    }
+
+    .logo img {
+      max-height: 45px;
+      width: auto;
+    }
+
+    .btn-header {
+      background-color: #2563eb;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .btn-header:hover {
+      background-color: #1d4ed8;
+    }
+
+    /* Secção Hero (Destaque Principal) */
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      text-align: center;
+      padding: 80px 20px;
+    }
+
+    .hero-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .hero h1 {
+      font-size: 36px;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: #94a3b8;
+      margin-bottom: 35px;
+    }
+
+    .btn-cta {
+      display: inline-block;
+      background-color: #25d366; /* Verde chamativo */
+      color: white;
+      padding: 16px 32px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 18px;
+      font-weight: bold;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+      transition: transform 0.2s, background 0.3s;
+    }
+
+    .btn-cta:hover {
+      background-color: #1ebc57;
+      transform: translateY(-2px);
+    }
+
+    /* Secção de Serviços */
+    .services {
+      max-width: 1100px;
+      margin: 60px auto;
+      padding: 0 20px;
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: 28px;
+      color: #0f172a;
+      margin-bottom: 40px;
+    }
+
+    .grid-services {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+
+    .card-service {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+      border: 1px solid #e2e8f0;
+      transition: transform 0.3s;
+    }
+
+    .card-service:hover {
+      transform: translateY(-5px);
+    }
+
+    .card-service h3 {
+      color: #2563eb;
+      font-size: 20px;
+      margin-bottom: 15px;
+    }
+
+    .card-service p {
+      color: #64748b;
+      font-size: 15px;
+    }
+
+    /* Rodapé */
+    footer {
+      background-color: #0f172a;
+      color: #64748b;
+      text-align: center;
+      padding: 30px 20px;
+      margin-top: 80px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="nav-container">
+      <div class="logo">
+        <img src="https://lh3.googleusercontent.com/d/1dOP4me2iiAevZzWTrzcWtHhpkO2OaJdF" alt="Proativa Solutions">
+      </div>
+      <a href="briefing.html" class="btn-header">Solicitar Projeto</a>
+    </div>
+  </header>
+
+  <!-- DESTAQUE PRINCIPAL (HERO) -->
+  <section class="hero">
+    <div class="hero-content">
+      <h1>Transformamos a sua operação com Apps sob medida e Planilhas Inteligentes</h1>
+      <p>Desenvolvemos soluções personalizadas em AppSheet e automações para otimizar o dia a dia do seu negócio de forma rápida e eficiente.</p>
+      <a href="briefing.html" class="btn-cta">Descrever Meu Projeto Agora</a>
+    </div>
+  </section>
+
+  <!-- SERVIÇOS -->
+  <section class="services">
+    <h2 class="section-title">Nossas Soluções</h2>
+    
+    <div class="grid-services">
+      <div class="card-service">
+        <h3>📱 Aplicativos em AppSheet</h3>
+        <p>Criação de aplicativos móveis e web sob medida para gestão de estoque, equipes de campo, vendas, chamados e processos internos sem complicações.</p>
+      </div>
+
+      <div class="card-service">
+        <h3>📊 Planilhas Inteligentes</h3>
+        <p>Desenvolvimento e otimização de planilhas com automações, dashboards dinâmicos e integração de dados para tomadas de decisão rápidas.</p>
+      </div>
+
+      <div class="card-service">
+        <h3>⚙️ Automação de Processos</h3>
+        <p>Elimine tarefas manuais repetitivas integrando seus formulários, e-mails e bancos de dados em um fluxo de trabalho automatizado.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- RODAPÉ -->
+  <footer>
+    <p>&copy; 2026 Proativa Solutions. Todos os direitos reservados.</p>
+  </footer>
+
+</body>
+</html>
