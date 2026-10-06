@@ -5,7 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solicitação de Projeto | Proativa Solutions</title>
   
+  <!-- FAVICON (Ícone da Aba do Navegador) -->
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO">
+
+  <!-- ==========================================
+       ESTILOS VISUAIS (CSS)
+       ========================================== -->
   <style>
+    html {
+      scroll-behavior: smooth;
+    }
+
     * {
       box-sizing: border-box;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -30,15 +40,14 @@
       max-width: 580px;
     }
 
-    /* Estilo do Logótipo no topo */
     .logo-container {
       text-align: center;
       margin-bottom: 20px;
     }
 
     .logo-container img {
-      max-width: 220px;
-      height: auto;
+      max-height: 70px;
+      width: auto;
     }
 
     h1 {
@@ -103,14 +112,30 @@
     button:hover {
       background-color: #1ebc57;
     }
+
+    /* Estilo de Voltar */
+    .btn-voltar {
+      display: inline-block;
+      margin-bottom: 15px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .btn-voltar:hover {
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
 
   <div class="container">
-    <!-- Logótipo da Empresa -->
+    <a href="index.html" class="btn-voltar">← Voltar para o Site</a>
+
+    <!-- Logótipo Proativa Solutions -->
     <div class="logo-container">
-      <img src="https://lh3.googleusercontent.com/d/1dOP4me2iiAevZzWTrzcWtHhpkO2OaJdF" alt="Proativa Solutions">
+      <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions">
     </div>
 
     <h1>Solicitação de Projeto</h1>
@@ -128,21 +153,23 @@
       </div>
 
       <div class="form-group">
-        <label for="whatsapp">WhatsApp para contato (com DDD/Código do país):</label>
-        <input type="tel" id="whatsapp" required placeholder="Ex.: 5511999999999 ou 351912345678">
+        <label for="whatsapp">WhatsApp para contato:</label>
+        <input type="tel" id="whatsapp" required placeholder="(83) 99999-9999" maxlength="15">
       </div>
 
       <div class="form-group">
-        <label for="tipoProjeto">Tipo de Projeto Pretendido:</label>
+        <label for="tipoProjeto">Tipo de Solução Pretendida:</label>
         <select id="tipoProjeto" required>
           <option value="">Selecione uma opção...</option>
-          <option value="App">App</option>
+          <option value="Aplicativo Personalizado">Aplicativo Personalizado</option>
+          <option value="Dashboard Inteligente">Dashboard Inteligente</option>
+          <option value="Automação de Processos">Automação de Processos / Tarefas</option>
           <option value="Ainda não tenho certeza">Ainda não tenho certeza (Preciso de consultoria)</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label for="problema">O que espera que o app resolva?</label>
+        <label for="problema">O que espera que a solução resolva?</label>
         <textarea id="problema" rows="4" required placeholder="Descreva a sua necessidade ou o problema atual..."></textarea>
       </div>
 
@@ -152,33 +179,73 @@
       </div>
 
       <div class="form-group">
-        <label for="orcamento">Orçamento Disponível Mensal (opcional):</label>
-        <input type="text" id="orcamento" placeholder="Ex.: R$ 1.500 ou € 300">
+        <label for="orcamento">Orçamento Disponível (opcional):</label>
+        <input type="text" id="orcamento" placeholder="Ex.: R$ 1.500">
       </div>
 
       <button type="submit">Enviar Solicitação via WhatsApp</button>
     </form>
   </div>
 
+  <!-- ==========================================
+       LÓGICA E INTEGRAÇÃO (JAVASCRIPT)
+       ========================================== -->
   <script>
-    // PARÂMETROS DE CONFIGURAÇÃO
-    const MEU_NUMERO_WHATSAPP = "5583987778549"; // O teu WhatsApp com DDD/Código do país
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPVY-as5xeAQoPGD7PL6VTR39S4ohk_CjF5-Ano0vRBbosD7o8DZDFxc_DBwKpbRCU/exec"; // URL da implantação do Apps Script
+    // PARAMETROS DE CONFIGURAÇÃO
+    const MEU_NUMERO_WHATSAPP = "5583921468797"; 
+    const APPS_SCRIPT_URL = "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT"; 
 
+    const inputWhatsapp = document.getElementById('whatsapp');
+
+    // MÁSCARA AUTOMÁTICA EM TEMPO REAL PARA O WHATSAPP
+    inputWhatsapp.addEventListener('input', function(e) {
+      let valor = e.target.value.replace(/\D/g, ''); // Remove tudo que não for dígito
+      
+      if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+
+      // Aplica a formatação (XX) XXXXX-XXXX
+      if (valor.length > 6) {
+        valor = `(${valor.slice(0, 2)}) ${valor.slice(2, 7)}-${valor.slice(7)}`;
+      } else if (valor.length > 2) {
+        valor = `(${valor.slice(0, 2)}) ${valor.slice(2)}`;
+      } else if (valor.length > 0) {
+        valor = `(${valor}`;
+      }
+
+      e.target.value = valor;
+    });
+
+    // VALIDAÇÃO E ENVIO DO FORMULÁRIO
     document.getElementById('formBriefing').addEventListener('submit', function(evento) {
       evento.preventDefault(); 
 
+      const email = document.getElementById('email').value.trim();
+      const rawWhatsapp = inputWhatsapp.value.replace(/\D/g, ''); // Apenas números
+
+      // Validação de formato de E-mail
+      const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!regexEmail.test(email)) {
+        alert('Por favor, informe um endereço de e-mail válido.');
+        return;
+      }
+
+      // Validação de tamanho do número do WhatsApp (Mínimo de 10 ou 11 dígitos com DDD)
+      if (rawWhatsapp.length < 10) {
+        alert('Por favor, informe um número de WhatsApp válido com DDD (Ex.: 83999999999).');
+        return;
+      }
+
       const dados = {
         nome: document.getElementById('nome').value,
-        email: document.getElementById('email').value,
-        whatsapp: document.getElementById('whatsapp').value,
+        email: email,
+        whatsapp: inputWhatsapp.value,
         tipoProjeto: document.getElementById('tipoProjeto').value,
         problema: document.getElementById('problema').value,
         prazo: document.getElementById('prazo').value,
         orcamento: document.getElementById('orcamento').value
       };
 
-      // 1. Envia os dados para o Google Apps Script
+      // 1. Envio para o Google Apps Script (e-mail + cópia)
       fetch(APPS_SCRIPT_URL, {
         method: 'POST',
         mode: 'no-cors',
@@ -186,7 +253,7 @@
         body: JSON.stringify(dados)
       });
 
-      // 2. Prepara e redireciona para o WhatsApp
+      // 2. Monta mensagem e abre o WhatsApp
       const textoWhatsApp = `*Novo Pedido de Projeto!*%0A%0A` +
         `*Nome:* ${dados.nome}%0A` +
         `*E-mail:* ${dados.email}%0A` +
@@ -194,7 +261,7 @@
         `*Tipo:* ${dados.tipoProjeto}%0A` +
         `*Problema:* ${dados.problema}%0A` +
         `*Prazo:* ${dados.prazo}%0A` +
-        `*Orçamento Mensal:* ${dados.orcamento}`;
+        `*Orçamento:* ${dados.orcamento}`;
 
       const urlWhatsApp = `https://wa.me/${MEU_NUMERO_WHATSAPP}?text=${textoWhatsApp}`;
       window.location.href = urlWhatsApp;
