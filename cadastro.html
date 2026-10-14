@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro de Cliente | Proativa Solutions</title>
+  
+  <!-- FAVICON -->
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO">
+
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; padding: 30px 20px; margin: 0; min-height: 100vh; }
+    .container { background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); width: 100%; max-width: 700px; }
+    .logo-container { text-align: center; margin-bottom: 25px; }
+    .logo-container img { max-height: 70px; width: auto; }
+    h1 { color: #0f172a; margin-bottom: 8px; font-size: 24px; text-align: center; }
+    p.descricao { color: #64748b; text-align: center; margin-bottom: 30px; font-size: 15px; }
+    
+    .section-header { background-color: #f8fafc; padding: 10px 15px; border-left: 4px solid #2563eb; font-weight: bold; color: #1e293b; margin: 25px 0 15px 0; font-size: 16px; border-radius: 0 6px 6px 0; }
+    
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group.full { grid-column: span 2; }
+    
+    label { display: block; margin-bottom: 6px; font-weight: 600; color: #334155; font-size: 14px; }
+    input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #1e293b; background-color: #f8fafc; }
+    input:focus, select:focus { border-color: #2563eb; background-color: #ffffff; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+    
+    button { width: 100%; padding: 15px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 20px; }
+    button:hover { background-color: #1d4ed8; }
+    .btn-voltar { display: inline-block; margin-bottom: 15px; color: #2563eb; text-decoration: none; font-weight: 600; font-size: 14px; }
+    
+    @media (max-width: 600px) { .form-grid { grid-template-columns: 1fr; } .form-group.full { grid-column: span 1; } }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <a href="index.html" class="btn-voltar">← Voltar para o Site</a>
+
+    <div class="logo-container">
+      <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions">
+    </div>
+
+    <h1>Cadastro de Cliente</h1>
+    <p class="descricao">Preencha as informações abaixo para realizarmos o seu registo na nossa plataforma.</p>
+
+    <form id="formCadastro">
+      
+      <!-- SEÇÃO 1: DADOS DA EMPRESA -->
+      <div class="section-header">1. Dados da Empresa / Negócio</div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="razaoSocial">Razão Social / Nome Completo:*</label>
+          <input type="text" id="razaoSocial" required placeholder="Razão Social ou Nome do Titular">
+        </div>
+
+        <div class="form-group">
+          <label for="nomeFantasia">Nome Fantasia:*</label>
+          <input type="text" id="nomeFantasia" required placeholder="Nome Comercial">
+        </div>
+
+        <div class="form-group">
+          <label for="cnpjCpf">CNPJ ou CPF:*</label>
+          <input type="text" id="cnpjCpf" required placeholder="00.000.000/0001-00">
+        </div>
+
+        <div class="form-group">
+          <label for="inscricaoEstadual">Inscrição Estadual (Opcional):</label>
+          <input type="text" id="inscricaoEstadual" placeholder="Caso possua">
+        </div>
+
+        <div class="form-group">
+          <label for="telefoneEmpresa">Telefone da Empresa:*</label>
+          <input type="text" id="telefoneEmpresa" required placeholder="(83) 3333-3333">
+        </div>
+
+        <div class="form-group full">
+          <label for="endereco">Endereço Completo (Rua, Nº, Bairro):*</label>
+          <input type="text" id="endereco" required placeholder="Rua, Número, Bairro">
+        </div>
+
+        <div class="form-group">
+          <label for="cidadeEstado">Cidade / UF:*</label>
+          <input type="text" id="cidadeEstado" required placeholder="Ex.: João Pessoa / PB">
+        </div>
+
+        <div class="form-group">
+          <label for="cep">CEP:*</label>
+          <input type="text" id="cep" required placeholder="58000-000">
+        </div>
+      </div>
+
+      <!-- SEÇÃO 2: DADOS DO RESPONSÁVEL -->
+      <div class="section-header">2. Responsável / Contato Principal</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="nomeResponsavel">Nome do Responsável:*</label>
+          <input type="text" id="nomeResponsavel" required placeholder="Nome completo">
+        </div>
+
+        <div class="form-group">
+          <label for="cargoResponsavel">Cargo / Função:*</label>
+          <input type="text" id="cargoResponsavel" required placeholder="Ex.: Gerente, Diretor, Proprietário">
+        </div>
+
+        <div class="form-group">
+          <label for="whatsappResponsavel">WhatsApp do Responsável:*</label>
+          <input type="tel" id="whatsappResponsavel" required placeholder="(83) 99999-9999" maxlength="15">
+        </div>
+
+        <div class="form-group">
+          <label for="emailResponsavel">E-mail do Responsável:*</label>
+          <input type="email" id="emailResponsavel" required placeholder="email@empresa.com">
+        </div>
+
+        <div class="form-group">
+          <label for="segmento">Ramo de Atuação / Segmento:*</label>
+          <input type="text" id="segmento" required placeholder="Ex.: Comércio, Serviços, Indústria">
+        </div>
+
+        <div class="form-group">
+          <label for="qtdUsuarios">Qtd. Estimada de Utilizadores no App:*</label>
+          <select id="qtdUsuarios" required>
+            <option value="">Selecione...</option>
+            <option value="1 a 5">1 a 5 utilizadores</option>
+            <option value="6 a 15">6 a 15 utilizadores</option>
+            <option value="16 a 30">16 a 30 utilizadores</option>
+            <option value="Mais de 30">Mais de 30 utilizadores</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" id="btnSalvar">Concluir Cadastro</button>
+    </form>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT";
+
+    // Máscara de WhatsApp
+    document.getElementById('whatsappResponsavel').addEventListener('input', function(e) {
+      let v = e.target.value.replace(/\D/g, '');
+      if (v.length > 11) v = v.slice(0, 11);
+      if (v.length > 6) v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
+      else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
+      else if (v.length > 0) v = `(${v}`;
+      e.target.value = v;
+    });
+
+    // Envio do Formulário
+    document.getElementById('formCadastro').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const btn = document.getElementById('btnSalvar');
+      btn.disabled = true;
+      btn.innerText = "A processar registo...";
+
+      const dados = {
+        razaoSocial: document.getElementById('razaoSocial').value,
+        nomeFantasia: document.getElementById('nomeFantasia').value,
+        cnpjCpf: document.getElementById('cnpjCpf').value,
+        inscricaoEstadual: document.getElementById('inscricaoEstadual').value,
+        telefoneEmpresa: document.getElementById('telefoneEmpresa').value,
+        endereco: document.getElementById('endereco').value,
+        cidadeEstado: document.getElementById('cidadeEstado').value,
+        cep: document.getElementById('cep').value,
+        nomeResponsavel: document.getElementById('nomeResponsavel').value,
+        cargoResponsavel: document.getElementById('cargoResponsavel').value,
+        whatsappResponsavel: document.getElementById('whatsappResponsavel').value,
+        emailResponsavel: document.getElementById('emailResponsavel').value,
+        segmento: document.getElementById('segmento').value,
+        qtdUsuarios: document.getElementById('qtdUsuarios').value
+      };
+
+      fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      }).then(() => {
+        alert("Cadastro concluído com sucesso! Verifique a sua caixa de e-mail.");
+        window.location.href = "index.html";
+      }).catch(err => {
+        alert("Erro ao enviar cadastro. Tente novamente.");
+        btn.disabled = false;
+        btn.innerText = "Concluir Cadastro";
+      });
+    });
+  </script>
+</body>
+</html>
