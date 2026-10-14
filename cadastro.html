@@ -137,6 +137,7 @@
   </div>
 
   <script>
+    // Cole aqui a URL do teu Apps Script
     const APPS_SCRIPT_URL = "COLE_AQUI_O_URL_DO_GOOGLE_APPS_SCRIPT";
 
     // Máscara de WhatsApp
@@ -158,6 +159,7 @@
       btn.innerText = "A processar registo...";
 
       const dados = {
+        tipoRequisicao: "cadastro", // Identificador de rota para o Apps Script
         razaoSocial: document.getElementById('razaoSocial').value,
         nomeFantasia: document.getElementById('nomeFantasia').value,
         cnpjCpf: document.getElementById('cnpjCpf').value,
