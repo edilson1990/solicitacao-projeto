@@ -11,7 +11,7 @@
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
     body { background-color: #f1f5f9; display: flex; justify-content: center; align-items: center; padding: 30px 20px; margin: 0; min-height: 100vh; }
-    .container { background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); width: 100%; max-width: 700px; }
+    .container { background-color: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08); width: 100%; max-width: 750px; }
     .logo-container { text-align: center; margin-bottom: 25px; }
     .logo-container img { max-height: 70px; width: auto; }
     h1 { color: #0f172a; margin-bottom: 8px; font-size: 24px; text-align: center; }
@@ -27,6 +27,9 @@
     input, select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; color: #1e293b; background-color: #f8fafc; }
     input:focus, select:focus { border-color: #2563eb; background-color: #ffffff; outline: none; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
     
+    .checkbox-container { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 13px; color: #2563eb; font-weight: 600; cursor: pointer; }
+    .checkbox-container input { width: auto; cursor: pointer; }
+
     button { width: 100%; padding: 15px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; margin-top: 20px; }
     button:hover { background-color: #1d4ed8; }
     .btn-voltar { display: inline-block; margin-bottom: 15px; color: #2563eb; text-decoration: none; font-weight: 600; font-size: 14px; }
@@ -52,23 +55,13 @@
       <div class="section-header">1. Dados da Empresa / Negócio</div>
       <div class="form-grid">
         <div class="form-group full">
-          <label for="razaoSocial">Razão Social / Nome Completo:*</label>
-          <input type="text" id="razaoSocial" required placeholder="Razão Social ou Nome do Titular">
+          <label for="nomeEmpresa">Nome da Empresa:*</label>
+          <input type="text" id="nomeEmpresa" required placeholder="Nome Comercial ou Razão Social">
         </div>
 
         <div class="form-group">
-          <label for="nomeFantasia">Nome Fantasia:*</label>
-          <input type="text" id="nomeFantasia" required placeholder="Nome Comercial">
-        </div>
-
-        <div class="form-group">
-          <label for="cnpjCpf">CNPJ ou CPF:*</label>
-          <input type="text" id="cnpjCpf" required placeholder="00.000.000/0001-00">
-        </div>
-
-        <div class="form-group">
-          <label for="inscricaoEstadual">Inscrição Estadual (Opcional):</label>
-          <input type="text" id="inscricaoEstadual" placeholder="Caso possua">
+          <label for="cnpjEmpresa">CNPJ / CPF da Empresa:*</label>
+          <input type="text" id="cnpjEmpresa" required placeholder="00.000.000/0001-00">
         </div>
 
         <div class="form-group">
@@ -76,25 +69,42 @@
           <input type="text" id="telefoneEmpresa" required placeholder="(83) 3333-3333">
         </div>
 
-        <div class="form-group full">
-          <label for="endereco">Endereço Completo (Rua, Nº, Bairro):*</label>
-          <input type="text" id="endereco" required placeholder="Rua, Número, Bairro">
+        <div class="form-group">
+          <label for="whatsappEmpresa">WhatsApp da Empresa:*</label>
+          <input type="tel" id="whatsappEmpresa" required placeholder="(83) 99999-9999">
+          <label class="checkbox-container">
+            <input type="checkbox" id="chkMesmoTelefoneEmpresa"> Mesmo do telefone da empresa
+          </label>
         </div>
 
         <div class="form-group">
-          <label for="cidadeEstado">Cidade / UF:*</label>
-          <input type="text" id="cidadeEstado" required placeholder="Ex.: João Pessoa / PB">
+          <label for="emailEmpresa">E-mail da Empresa:*</label>
+          <input type="email" id="emailEmpresa" required placeholder="empresa@dominio.com">
+        </div>
+
+        <div class="form-group full">
+          <label for="enderecoEmpresa">Endereço da Empresa:*</label>
+          <input type="text" id="enderecoEmpresa" required placeholder="Rua, Número, Bairro, Cidade - UF">
         </div>
 
         <div class="form-group">
-          <label for="cep">CEP:*</label>
-          <input type="text" id="cep" required placeholder="58000-000">
+          <label for="ramoAtividade">Ramo / Atividade:*</label>
+          <input type="text" id="ramoAtividade" required placeholder="Ex.: Comércio, Serviços, Logística">
         </div>
 
-        <!-- NOVO CAMPO: DIA DE VENCIMENTO -->
-        <div class="form-group full">
-          <label for="diaVencimento">Melhor Dia para Vencimento da Mensalidade:*</label>
-          <select id="diaVencimento" required>
+        <div class="form-group">
+          <label for="qtdFuncionarios">Quantidade Total de Funcionários:*</label>
+          <input type="number" id="qtdFuncionarios" required placeholder="Ex.: 10">
+        </div>
+
+        <div class="form-group">
+          <label for="qtdUsaramApp">Qtd. Funcionários que Utilizarão o App:*</label>
+          <input type="number" id="qtdUsaramApp" required placeholder="Ex.: 5">
+        </div>
+
+        <div class="form-group">
+          <label for="melhorVencimento">Melhor Dia para Vencimento:*</label>
+          <select id="melhorVencimento" required>
             <option value="">Selecione o dia...</option>
             <option value="Dia 05">Dia 05</option>
             <option value="Dia 10">Dia 10</option>
@@ -106,48 +116,59 @@
       </div>
 
       <!-- SEÇÃO 2: DADOS DO RESPONSÁVEL -->
-      <div class="section-header">2. Responsável / Contato Principal</div>
+      <div class="section-header">2. Dados do Responsável pela Empresa</div>
       <div class="form-grid">
-        <div class="form-group">
-          <label for="nomeResponsavel">Nome do Responsável:*</label>
-          <input type="text" id="nomeResponsavel" required placeholder="Nome completo">
+        <div class="form-group full">
+          <label for="nomeResponsavel">Nome da Pessoa Responsável:*</label>
+          <input type="text" id="nomeResponsavel" required placeholder="Nome completo do responsável">
         </div>
 
         <div class="form-group">
-          <label for="cargoResponsavel">Cargo / Função:*</label>
-          <input type="text" id="cargoResponsavel" required placeholder="Ex.: Gerente, Diretor, Proprietário">
+          <label for="cpfResponsavel">CPF do Responsável:*</label>
+          <input type="text" id="cpfResponsavel" required placeholder="000.000.000-00">
         </div>
 
-        <!-- NOVO CAMPO: DATA DE NASCIMENTO -->
         <div class="form-group">
-          <label for="dataNascimento">Data de Nascimento do Responsável:*</label>
+          <label for="dataNascimento">Data de Nascimento:*</label>
           <input type="date" id="dataNascimento" required>
         </div>
 
         <div class="form-group">
+          <label for="telefoneContato">Telefone de Contato:*</label>
+          <input type="text" id="telefoneContato" required placeholder="(83) 99999-9999">
+        </div>
+
+        <div class="form-group">
           <label for="whatsappResponsavel">WhatsApp do Responsável:*</label>
-          <input type="tel" id="whatsappResponsavel" required placeholder="(83) 99999-9999" maxlength="15">
+          <input type="tel" id="whatsappResponsavel" required placeholder="(83) 99999-9999">
+          <label class="checkbox-container">
+            <input type="checkbox" id="chkMesmoTelefoneResponsavel"> Mesmo do telefone de contato
+          </label>
         </div>
 
         <div class="form-group full">
           <label for="emailResponsavel">E-mail do Responsável:*</label>
-          <input type="email" id="emailResponsavel" required placeholder="email@empresa.com">
+          <input type="email" id="emailResponsavel" required placeholder="responsavel@dominio.com">
         </div>
 
         <div class="form-group">
-          <label for="segmento">Ramo de Atuação / Segmento:*</label>
-          <input type="text" id="segmento" required placeholder="Ex.: Comércio, Serviços, Indústria">
+          <label for="cepResponsavel">CEP:* <small style="color: #2563eb;">(Preenchimento automático do endereço)</small></label>
+          <input type="text" id="cepResponsavel" required placeholder="58000-000" maxlength="9">
         </div>
 
         <div class="form-group">
-          <label for="qtdUsuarios">Qtd. Estimada de Utilizadores no App:*</label>
-          <select id="qtdUsuarios" required>
-            <option value="">Selecione...</option>
-            <option value="1 a 5">1 a 5 utilizadores</option>
-            <option value="6 a 15">6 a 15 utilizadores</option>
-            <option value="16 a 30">16 a 30 utilizadores</option>
-            <option value="Mais de 30">Mais de 30 utilizadores</option>
-          </select>
+          <label for="estadoResponsavel">Estado (UF):*</label>
+          <input type="text" id="estadoResponsavel" required placeholder="EX.: PB">
+        </div>
+
+        <div class="form-group">
+          <label for="cidadeResponsavel">Cidade:*</label>
+          <input type="text" id="cidadeResponsavel" required placeholder="Ex.: João Pessoa">
+        </div>
+
+        <div class="form-group full">
+          <label for="logradouroResponsavel">Logradouro / Endereço Completo:*</label>
+          <input type="text" id="logradouroResponsavel" required placeholder="Rua, Número, Bairro">
         </div>
       </div>
 
@@ -158,17 +179,49 @@
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPVY-as5xeAQoPGD7PL6VTR39S4ohk_CjF5-Ano0vRBbosD7o8DZDFxc_DBwKpbRCU/exec";
 
-    // Máscara de WhatsApp
-    document.getElementById('whatsappResponsavel').addEventListener('input', function(e) {
-      let v = e.target.value.replace(/\D/g, '');
-      if (v.length > 11) v = v.slice(0, 11);
-      if (v.length > 6) v = `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
-      else if (v.length > 2) v = `(${v.slice(0, 2)}) ${v.slice(2)}`;
-      else if (v.length > 0) v = `(${v}`;
-      e.target.value = v;
+    // 1. LÓGICA DO CHECKBOX "MESMO DO TELEFONE DA EMPRESA"
+    document.getElementById('chkMesmoTelefoneEmpresa').addEventListener('change', function() {
+      const telEmpresa = document.getElementById('telefoneEmpresa').value;
+      const waEmpresa = document.getElementById('whatsappEmpresa');
+      if (this.checked) {
+        waEmpresa.value = telEmpresa;
+      }
     });
 
-    // Envio do Formulário
+    // 2. LÓGICA DO CHECKBOX "MESMO DO TELEFONE DO RESPONSÁVEL"
+    document.getElementById('chkMesmoTelefoneResponsavel').addEventListener('change', function() {
+      const telContato = document.getElementById('telefoneContato').value;
+      const waResponsavel = document.getElementById('whatsappResponsavel');
+      if (this.checked) {
+        waResponsavel.value = telContato;
+      }
+    });
+
+    // 3. CONSULTA AUTOMÁTICA DE CEP VIA API VIACEP
+    document.getElementById('cepResponsavel').addEventListener('blur', function() {
+      let cep = this.value.replace(/\D/g, '');
+      if (cep.length === 8) {
+        document.getElementById('logradouroResponsavel').value = "Buscando endereço...";
+        
+        fetch(`https://viacep.com.br/ws/${cep}/json/`)
+          .then(res => res.json())
+          .then(dados => {
+            if (!dados.erro) {
+              document.getElementById('logradouroResponsavel').value = dados.logradouro + (dados.bairro ? `, ${dados.bairro}` : '');
+              document.getElementById('cidadeResponsavel').value = dados.localidade;
+              document.getElementById('estadoResponsavel').value = dados.uf;
+            } else {
+              alert("CEP não encontrado. Preencha o endereço manualmente.");
+              document.getElementById('logradouroResponsavel').value = "";
+            }
+          })
+          .catch(() => {
+            document.getElementById('logradouroResponsavel').value = "";
+          });
+      }
+    });
+
+    // 4. ENVIO DO FORMULÁRIO COM MAPEAMENTO DOS CAMPOS
     document.getElementById('formCadastro').addEventListener('submit', function(e) {
       e.preventDefault();
       
@@ -178,22 +231,29 @@
 
       const dados = {
         tipoRequisicao: "cadastro",
-        razaoSocial: document.getElementById('razaoSocial').value,
-        nomeFantasia: document.getElementById('nomeFantasia').value,
-        cnpjCpf: document.getElementById('cnpjCpf').value,
-        inscricaoEstadual: document.getElementById('inscricaoEstadual').value,
+        // Dados da Empresa
+        nomeEmpresa: document.getElementById('nomeEmpresa').value,
+        cnpjEmpresa: document.getElementById('cnpjEmpresa').value,
         telefoneEmpresa: document.getElementById('telefoneEmpresa').value,
-        endereco: document.getElementById('endereco').value,
-        cidadeEstado: document.getElementById('cidadeEstado').value,
-        cep: document.getElementById('cep').value,
-        diaVencimento: document.getElementById('diaVencimento').value,
+        whatsappEmpresa: document.getElementById('whatsappEmpresa').value,
+        emailEmpresa: document.getElementById('emailEmpresa').value,
+        enderecoEmpresa: document.getElementById('enderecoEmpresa').value,
+        ramoAtividade: document.getElementById('ramoAtividade').value,
+        qtdFuncionarios: document.getElementById('qtdFuncionarios').value,
+        qtdUsaramApp: document.getElementById('qtdUsaramApp').value,
+        melhorVencimento: document.getElementById('melhorVencimento').value,
+
+        // Dados do Responsável
         nomeResponsavel: document.getElementById('nomeResponsavel').value,
-        cargoResponsavel: document.getElementById('cargoResponsavel').value,
+        cpfResponsavel: document.getElementById('cpfResponsavel').value,
         dataNascimento: document.getElementById('dataNascimento').value,
+        telefoneContato: document.getElementById('telefoneContato').value,
         whatsappResponsavel: document.getElementById('whatsappResponsavel').value,
         emailResponsavel: document.getElementById('emailResponsavel').value,
-        segmento: document.getElementById('segmento').value,
-        qtdUsuarios: document.getElementById('qtdUsuarios').value
+        cepResponsavel: document.getElementById('cepResponsavel').value,
+        estadoResponsavel: document.getElementById('estadoResponsavel').value,
+        cidadeResponsavel: document.getElementById('cidadeResponsavel').value,
+        logradouroResponsavel: document.getElementById('logradouroResponsavel').value
       };
 
       fetch(APPS_SCRIPT_URL, {
@@ -202,7 +262,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(dados)
       }).then(() => {
-        alert("Cadastro concluído com sucesso! Verifique a sua caixa de e-mail.");
+        alert("Cadastro concluído com sucesso! Verifique o e-mail.");
         window.location.href = "index.html";
       }).catch(err => {
         alert("Erro ao enviar cadastro. Tente novamente.");
