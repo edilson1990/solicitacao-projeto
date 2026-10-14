@@ -90,6 +90,19 @@
           <label for="cep">CEP:*</label>
           <input type="text" id="cep" required placeholder="58000-000">
         </div>
+
+        <!-- NOVO CAMPO: DIA DE VENCIMENTO -->
+        <div class="form-group full">
+          <label for="diaVencimento">Melhor Dia para Vencimento da Mensalidade:*</label>
+          <select id="diaVencimento" required>
+            <option value="">Selecione o dia...</option>
+            <option value="Dia 05">Dia 05</option>
+            <option value="Dia 10">Dia 10</option>
+            <option value="Dia 15">Dia 15</option>
+            <option value="Dia 20">Dia 20</option>
+            <option value="Dia 25">Dia 25</option>
+          </select>
+        </div>
       </div>
 
       <!-- SEÇÃO 2: DADOS DO RESPONSÁVEL -->
@@ -105,12 +118,18 @@
           <input type="text" id="cargoResponsavel" required placeholder="Ex.: Gerente, Diretor, Proprietário">
         </div>
 
+        <!-- NOVO CAMPO: DATA DE NASCIMENTO -->
+        <div class="form-group">
+          <label for="dataNascimento">Data de Nascimento do Responsável:*</label>
+          <input type="date" id="dataNascimento" required>
+        </div>
+
         <div class="form-group">
           <label for="whatsappResponsavel">WhatsApp do Responsável:*</label>
           <input type="tel" id="whatsappResponsavel" required placeholder="(83) 99999-9999" maxlength="15">
         </div>
 
-        <div class="form-group">
+        <div class="form-group full">
           <label for="emailResponsavel">E-mail do Responsável:*</label>
           <input type="email" id="emailResponsavel" required placeholder="email@empresa.com">
         </div>
@@ -137,7 +156,6 @@
   </div>
 
   <script>
-    // Cole aqui a URL do teu Apps Script
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPVY-as5xeAQoPGD7PL6VTR39S4ohk_CjF5-Ano0vRBbosD7o8DZDFxc_DBwKpbRCU/exec";
 
     // Máscara de WhatsApp
@@ -159,7 +177,7 @@
       btn.innerText = "A processar registo...";
 
       const dados = {
-        tipoRequisicao: "cadastro", // Identificador de rota para o Apps Script
+        tipoRequisicao: "cadastro",
         razaoSocial: document.getElementById('razaoSocial').value,
         nomeFantasia: document.getElementById('nomeFantasia').value,
         cnpjCpf: document.getElementById('cnpjCpf').value,
@@ -168,8 +186,10 @@
         endereco: document.getElementById('endereco').value,
         cidadeEstado: document.getElementById('cidadeEstado').value,
         cep: document.getElementById('cep').value,
+        diaVencimento: document.getElementById('diaVencimento').value,
         nomeResponsavel: document.getElementById('nomeResponsavel').value,
         cargoResponsavel: document.getElementById('cargoResponsavel').value,
+        dataNascimento: document.getElementById('dataNascimento').value,
         whatsappResponsavel: document.getElementById('whatsappResponsavel').value,
         emailResponsavel: document.getElementById('emailResponsavel').value,
         segmento: document.getElementById('segmento').value,
