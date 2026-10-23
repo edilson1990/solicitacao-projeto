@@ -126,6 +126,106 @@
       transform: translateY(-2px);
     }
 
+    /* ==========================================
+       SEÇÃO NOSSOS CLIENTES (CARROSSEL INFINITO)
+       ========================================== */
+    .section-clientes {
+      background-color: #ffffff;
+      padding: 60px 0;
+      border-bottom: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+
+    .clientes-title {
+      text-align: center;
+      font-size: 26px;
+      color: #0f172a;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .clientes-subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 15px;
+      margin-bottom: 35px;
+    }
+
+    .carousel-container {
+      display: flex;
+      width: 100%;
+      overflow: hidden;
+      user-select: none;
+      position: relative;
+    }
+
+    .carousel-container::before, .carousel-container::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      width: 100px;
+      height: 100%;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .carousel-container::before {
+      left: 0;
+      background: linear-gradient(to right, #ffffff, transparent);
+    }
+
+    .carousel-container::after {
+      right: 0;
+      background: linear-gradient(to left, #ffffff, transparent);
+    }
+
+    .carousel-track {
+      display: flex;
+      gap: 40px;
+      animation: scroll 25s linear infinite;
+      width: max-content;
+      align-items: center;
+    }
+
+    .carousel-container:hover .carousel-track {
+      animation-play-state: paused;
+    }
+
+    @keyframes scroll {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .client-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 15px 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 90px;
+      width: 180px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .client-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+    }
+
+    .client-card img {
+      max-height: 55px;
+      max-width: 130px;
+      object-fit: contain;
+      filter: grayscale(20%);
+      transition: filter 0.3s;
+    }
+
+    .client-card:hover img {
+      filter: grayscale(0%);
+    }
+
     /* Secção de Soluções */
     .services {
       max-width: 1200px;
@@ -290,6 +390,18 @@
     </div>
   </section>
 
+  <!-- SEÇÃO DINÂMICA: NOSSOS CLIENTES (CARROSSEL) -->
+  <section class="section-clientes" id="secaoClientes" style="display: none;">
+    <h2 class="clientes-title">Empresas que Confiam na Proativa</h2>
+    <p class="clientes-subtitle">Transformando processos e impulsionando negócios através de tecnologia sob medida.</p>
+    
+    <div class="carousel-container">
+      <div class="carousel-track" id="carouselTrack">
+        <!-- As logos serão inseridas dinamicamente via JavaScript -->
+      </div>
+    </div>
+  </section>
+
   <!-- SERVIÇOS & SOLUÇÕES -->
   <section class="services">
     <h2 class="section-title">O que Desenvolvemos para Você</h2>
@@ -351,6 +463,38 @@
     <p>&copy; 2026 Proativa Solutions. Todos os direitos reservados.</p>
     <p>Soluções Inteligentes com Apps, Dashboards e Automações.</p>
   </footer>
+
+  <!-- SCRIPT JS PARA CARREGAR AS LOGOS DOS CLIENTES DO APPS SCRIPT -->
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPVY-as5xeAQoPGD7PL6VTR39S4ohk_CjF5-Ano0vRBbosD7o8DZDFxc_DBwKpbRCU/exec";
+
+    document.addEventListener("DOMContentLoaded", function() {
+      fetch(APPS_SCRIPT_URL)
+        .then(res => res.json())
+        .then(dados => {
+          if (dados.status === "sucesso" && dados.clientes && dados.clientes.length > 0) {
+            const track = document.getElementById('carouselTrack');
+            const secao = document.getElementById('secaoClientes');
+            
+            // Duplica a lista de clientes para criar o efeito de loop infinito
+            const listaCompleta = [...dados.clientes, ...dados.clientes, ...dados.clientes];
+            
+            track.innerHTML = "";
+            listaCompleta.forEach(cliente => {
+              const card = document.createElement('div');
+              card.className = 'client-card';
+              card.innerHTML = `<img src="${cliente.logo}" alt="${cliente.nome}" title="${cliente.nome}">`;
+              track.appendChild(card);
+            });
+
+            secao.style.display = "block";
+          }
+        })
+        .catch(err => {
+          console.log("Aviso: Nenhuma logo de cliente carregada.", err);
+        });
+    });
+  </script>
 
 </body>
 </html>
