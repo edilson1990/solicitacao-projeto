@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proativa Solutions — Painel de Atendimento Omnichannel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
+
+  <!-- TELAS DE LOGIN DE SEGURANÇA GOOGLE -->
+  <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
+      <div class="flex justify-center">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-12">
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-white">Painel Administrativo Proativa</h1>
+        <p class="text-slate-400 text-sm mt-1">Acesso restrito para equipe de atendimento</p>
+      </div>
+      <div id="g_id_onload"
+           data-client_id="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="flex justify-center">
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_blue"></div>
+      </div>
+      <p id="login-error" class="text-rose-400 text-xs hidden font-medium"></p>
+    </div>
+  </div>
+
+  <!-- CABEÇALHO DO PAINEL DE ATENDIMENTO -->
+  <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center shrink-0">
+    <div class="flex items-center space-x-3">
+      <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Logo" class="h-8">
+      <span class="text-sm font-semibold text-slate-300 border-l border-slate-800 pl-3">Central Omnichannel</span>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="user-email-display" class="text-xs text-slate-300 font-medium"></span>
+      </div>
+      <button onclick="logout()" class="text-slate-400 hover:text-white text-xs font-semibold px-2 py-1 transition">Sair</button>
+    </div>
+  </header>
+
+  <!-- ESTRUTURA PRINCIPAL (SIDEBAR + CHAT) -->
+  <div id="app-container" class="flex-1 flex overflow-hidden">
+
+    <!-- COLUNA DA ESQUERDA: LISTA DE CHAMADOS -->
+    <aside class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
+      
+      <!-- ABAS DA FILA -->
+      <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950">
+        <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">Fila Geral</button>
+        <button onclick="setFila('meus')" id="tab-meus" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Meus</button>
+        <button onclick="setFila('historico')" id="tab-historico" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Histórico</button>
+      </div>
+
+      <!-- LISTA DE CHAMADOS -->
+      <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
+        <div class="p-8 text-center text-slate-500 text-xs">Carregando chamados...</div>
+      </div>
+    </aside>
+
+    <!-- COLUNA DA DIREITA: PAINEL DE CONVERSA -->
+    <main class="flex-1 flex flex-col bg-slate-900/40 relative">
+      
+      <!-- CABEÇALHO DO CHAT SELECIONADO -->
+      <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
+        <div class="flex items-center space-x-3">
+          <div id="chat-avatar" class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300"></div>
+          <div>
+            <h2 id="chat-client-name" class="font-bold text-white text-sm"></h2>
+            <p id="chat-client-phone" class="text-xs text-slate-400"></p>
+          </div>
+        </div>
+        <div class="flex space-x-2" id="chat-actions"></div>
+      </div>
+
+      <!-- CORPO DA CONVERSA (MENSAGENS) -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+        <div class="h-full flex items-center justify-center text-slate-500 text-xs">
+          Selecione uma conversa da lista para iniciar o atendimento.
+        </div>
+      </div>
+
+      <!-- INPUT DE RESPOSTA DA EQUIPE -->
+      <div id="chat-input-box" class="p-4 border-t border-slate-800 bg-slate-950 hidden">
+        <div class="flex space-x-2">
+          <textarea id="message-input" rows="1" placeholder="Digite sua resposta..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+          <button onclick="enviarMensagem()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center justify-center">
+            <i class="fa-solid fa-paper-plane text-sm"></i>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1BNA4pXax4OmVLZLH51pi58lEZoh2wHCKTVvlopFYYp6MhznnfHSwZLTWWTz8yLN4/exec";
+    const EMAILS_AUTORIZADOS = ["solutionsproativa@gmail.com", "edilsonfpcavalcanti@gmail.com", "andreza.jp.pb@gmail.com"];
+
+    let usuarioLogado = null;
+    let abaAtual = 'filaGeral';
+    let todosChats = [];
+    let chatSelecionado = null;
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    }
+
+    function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      if (EMAILS_AUTORIZADOS.includes(payload.email)) {
+        usuarioLogado = payload.email;
+        document.getElementById('user-email-display').innerText = usuarioLogado;
+        document.getElementById('login-container').classList.add('hidden');
+        carregarChats();
+        setInterval(carregarChats, 10000);
+      } else {
+        const err = document.getElementById('login-error');
+        err.innerText = "Acesso negado: O e-mail " + payload.email + " não é autorizado.";
+        err.classList.remove('hidden');
+      }
+    }
+
+    function logout() {
+      location.reload();
+    }
+
+    function setFila(fila) {
+      abaAtual = fila;
+      ['filaGeral', 'meus', 'historico'].forEach(f => {
+        const tab = document.getElementById('tab-' + f);
+        if (f === fila) {
+          tab.className = "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition";
+        } else {
+          tab.className = "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition";
+        }
+      });
+      renderizarListaChats();
+    }
+
+    async function carregarChats() {
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=getChats`);
+        const data = await res.json();
+        if (data.status === "sucesso") {
+          todosChats = data.chats;
+          renderizarListaChats();
+        }
+      } catch (e) { console.error("Erro ao carregar chats:", e); }
+    }
+
+    function renderizarListaChats() {
+      const listEl = document.getElementById('chat-list');
+      let filtrados = [];
+
+      if (abaAtual === 'filaGeral') {
+        filtrados = todosChats.filter(c => c.atendente === 'Fila Geral' && c.status !== 'Finalizado');
+      } else if (abaAtual === 'meus') {
+        filtrados = todosChats.filter(c => c.atendente === usuarioLogado && c.status !== 'Finalizado');
+      } else {
+        filtrados = todosChats.filter(c => c.status === 'Finalizado');
+      }
+
+      if (filtrados.length === 0) {
+        listEl.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">Nenhum chamado nesta fila.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = filtrados.map(c => `
+        <div onclick="abrirChat('${c.idAtendimento}')" class="p-4 hover:bg-slate-900/80 cursor-pointer transition flex justify-between items-start space-x-3 ${chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento ? 'bg-slate-900 border-l-4 border-indigo-500' : ''}">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center space-x-2">
+              <span class="font-semibold text-slate-200 text-sm truncate">${c.nomeCliente}</span>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${c.canal === 'Instagram' ? 'bg-pink-500/20 text-pink-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.canal}</span>
+            </div>
+            <p class="text-xs text-slate-400 truncate mt-1">${c.ultimaMensagem || 'Sem mensagens'}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    async function abrirChat(idAtendimento) {
+      chatSelecionado = todosChats.find(c => c.idAtendimento === idAtendimento);
+      renderizarListaChats();
+
+      document.getElementById('chat-header').classList.remove('hidden');
+      document.getElementById('chat-input-box').classList.remove('hidden');
+      document.getElementById('chat-client-name').innerText = chatSelecionado.nomeCliente;
+      document.getElementById('chat-client-phone').innerText = chatSelecionado.telefone + " • " + chatSelecionado.canal;
+      document.getElementById('chat-avatar').innerText = chatSelecionado.nomeCliente.substring(0, 2).toUpperCase();
+
+      const actionsEl = document.getElementById('chat-actions');
+      if (chatSelecionado.atendente === 'Fila Geral' && chatSelecionado.status !== 'Finalizado') {
+        actionsEl.innerHTML = `<button onclick="assumirChat('${chatSelecionado.idAtendimento}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Assumir Chamado</button>`;
+      } else if (chatSelecionado.status !== 'Finalizado') {
+        actionsEl.innerHTML = `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar Atendimento</button>`;
+      } else { actionsEl.innerHTML = ''; }
+
+      carregarMensagens(idAtendimento);
+    }
+
+    async function carregarMensagens(idAtendimento) {
+      const msgsEl = document.getElementById('chat-messages');
+      try {
+        const res = await fetch(`${APPS_SCRIPT_URL}?action=getMensagens&idAtendimento=${idAtendimento}`);
+        const data = await res.json();
+        if (data.status === "sucesso") {
+          msgsEl.innerHTML = data.mensagens.map(m => {
+            const isCliente = m.remetenteTipo === 'Cliente';
+            return `
+              <div class="flex ${isCliente ? 'justify-start' : 'justify-end'}">
+                <div class="max-w-[75%] rounded-2xl p-3.5 text-xs ${isCliente ? 'bg-slate-800 text-slate-200 rounded-tl-none' : 'bg-indigo-600 text-white rounded-tr-none'} shadow-md space-y-1">
+                  <p class="font-semibold text-[10px] opacity-75">${m.nomeRemetente}</p>
+                  <p class="leading-relaxed">${m.conteudo}</p>
+                </div>
+              </div>
+            `;
+          }).join('');
+          msgsEl.scrollTop = msgsEl.scrollHeight;
+        }
+      } catch (e) { console.error("Erro ao carregar mensagens:", e); }
+    }
+
+    async function assumirChat(idAtendimento) {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'assumirAtendimento', idAtendimento: idAtendimento, emailAtendente: usuarioLogado })
+      });
+      carregarChats();
+      abrirChat(idAtendimento);
+    }
+
+    async function finalizarChat(idAtendimento) {
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'finalizarAtendimento', idAtendimento: idAtendimento })
+      });
+      carregarChats();
+      document.getElementById('chat-header').classList.add('hidden');
+      document.getElementById('chat-input-box').classList.add('hidden');
+      document.getElementById('chat-messages').innerHTML = `<div class="h-full flex items-center justify-center text-slate-500 text-xs">Chamado finalizado com sucesso.</div>`;
+    }
+
+    async function enviarMensagem() {
+      const input = document.getElementById('message-input');
+      const texto = input.value.trim();
+      if (!texto || !chatSelecionado) return;
+
+      input.value = '';
+      await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'enviarResposta',
+          idAtendimento: chatSelecionado.idAtendimento,
+          textoResposta: texto,
+          nomeAtendente: usuarioLogado
+        })
+      });
+      carregarMensagens(chatSelecionado.idAtendimento);
+    }
+  </script>
+</body>
+</html>
