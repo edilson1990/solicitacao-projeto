@@ -3,25 +3,25 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proativa Solutions — Painel de Atendimento Omnichannel</title>
+  <title>Proativa Solutions — Painel Omnichannel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
 
-  <!-- TELAS DE LOGIN DE SEGURANÇA GOOGLE -->
+  <!-- TELA DE LOGIN GOOGLE -->
   <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
       <div class="flex justify-center">
-        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-12">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa" class="h-12">
       </div>
       <div>
         <h1 class="text-xl font-bold text-white">Painel Administrativo Proativa</h1>
         <p class="text-slate-400 text-sm mt-1">Acesso restrito para equipe de atendimento</p>
       </div>
       <div id="g_id_onload"
-           data-client_id="698900358884-lqfh1vlne9u6hq2rnip2q28jva1f4dsg.apps.googleusercontent.com"
+           data-client_id="698900358884-1qfh1vlne9u6hq2rnip2q28jva1f4dsg.apps.googleusercontent.com"
            data-callback="handleCredentialResponse"
            data-auto_prompt="false">
       </div>
@@ -32,7 +32,7 @@
     </div>
   </div>
 
-  <!-- CABEÇALHO DO PAINEL DE ATENDIMENTO -->
+  <!-- CABEÇALHO -->
   <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center shrink-0">
     <div class="flex items-center space-x-3">
       <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Logo" class="h-8">
@@ -47,29 +47,20 @@
     </div>
   </header>
 
-  <!-- ESTRUTURA PRINCIPAL (SIDEBAR + CHAT) -->
+  <!-- PAINEL DE ATENDIMENTO -->
   <div id="app-container" class="flex-1 flex overflow-hidden">
-
-    <!-- COLUNA DA ESQUERDA: LISTA DE CHAMADOS -->
     <aside class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
-      
-      <!-- ABAS DA FILA -->
       <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950">
         <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">Fila Geral</button>
         <button onclick="setFila('meus')" id="tab-meus" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Meus</button>
         <button onclick="setFila('historico')" id="tab-historico" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Histórico</button>
       </div>
-
-      <!-- LISTA DE CHAMADOS -->
       <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
         <div class="p-8 text-center text-slate-500 text-xs">Carregando chamados...</div>
       </div>
     </aside>
 
-    <!-- COLUNA DA DIREITA: PAINEL DE CONVERSA -->
     <main class="flex-1 flex flex-col bg-slate-900/40 relative">
-      
-      <!-- CABEÇALHO DO CHAT SELECIONADO -->
       <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
         <div class="flex items-center space-x-3">
           <div id="chat-avatar" class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300"></div>
@@ -81,16 +72,20 @@
         <div class="flex space-x-2" id="chat-actions"></div>
       </div>
 
-      <!-- CORPO DA CONVERSA (MENSAGENS) -->
+      <!-- CORPO DA CONVERSA -->
       <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
         <div class="h-full flex items-center justify-center text-slate-500 text-xs">
-          Selecione uma conversa da lista para iniciar o atendimento.
+          Selecione uma conversa para iniciar o atendimento.
         </div>
       </div>
 
-      <!-- INPUT DE RESPOSTA DA EQUIPE -->
+      <!-- INPUT DE RESPOSTA + BOTÃO DE ANEXOS -->
       <div id="chat-input-box" class="p-4 border-t border-slate-800 bg-slate-950 hidden">
-        <div class="flex space-x-2">
+        <div class="flex items-center space-x-2">
+          <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
+          <button onclick="document.getElementById('file-input').click()" title="Anexar arquivo/imagem" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition">
+            <i class="fa-solid fa-paperclip text-sm"></i>
+          </button>
           <textarea id="message-input" rows="1" placeholder="Digite sua resposta..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
           <button onclick="enviarMensagem()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center justify-center">
             <i class="fa-solid fa-paper-plane text-sm"></i>
@@ -122,7 +117,12 @@
         document.getElementById('user-email-display').innerText = usuarioLogado;
         document.getElementById('login-container').classList.add('hidden');
         carregarChats();
-        setInterval(carregarChats, 10000);
+        
+        // Loop de sincronização em tempo real (4 segundos)
+        setInterval(() => {
+          carregarChats();
+          if (chatSelecionado) carregarMensagens(chatSelecionado.idAtendimento, true);
+        }, 4000);
       } else {
         const err = document.getElementById('login-error');
         err.innerText = "Acesso negado: O e-mail " + payload.email + " não é autorizado.";
@@ -130,19 +130,14 @@
       }
     }
 
-    function logout() {
-      location.reload();
-    }
+    function logout() { location.reload(); }
 
     function setFila(fila) {
       abaAtual = fila;
       ['filaGeral', 'meus', 'historico'].forEach(f => {
-        const tab = document.getElementById('tab-' + f);
-        if (f === fila) {
-          tab.className = "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition";
-        } else {
-          tab.className = "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition";
-        }
+        document.getElementById('tab-' + f).className = (f === fila) 
+          ? "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition"
+          : "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition";
       });
       renderizarListaChats();
     }
@@ -193,7 +188,6 @@
       if (!chatSelecionado) return;
 
       renderizarListaChats();
-
       document.getElementById('chat-header').classList.remove('hidden');
       document.getElementById('chat-input-box').classList.remove('hidden');
       document.getElementById('chat-client-name').innerText = chatSelecionado.nomeCliente;
@@ -201,7 +195,7 @@
       document.getElementById('chat-avatar').innerText = chatSelecionado.nomeCliente.substring(0, 2).toUpperCase();
 
       atualizarBotoesAcao();
-      carregarMensagens(idAtendimento);
+      carregarMensagens(idAtendimento, false);
     }
 
     function atualizarBotoesAcao() {
@@ -212,62 +206,68 @@
         actionsEl.innerHTML = `<button onclick="assumirChat('${chatSelecionado.idAtendimento}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Assumir Chamado</button>`;
       } else if (chatSelecionado.status !== 'Finalizado') {
         actionsEl.innerHTML = `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar Atendimento</button>`;
-      } else { 
-        actionsEl.innerHTML = ''; 
-      }
+      } else { actionsEl.innerHTML = ''; }
     }
 
-    async function carregarMensagens(idAtendimento) {
+    async function carregarMensagens(idAtendimento, isSilent) {
       const msgsEl = document.getElementById('chat-messages');
       try {
         const res = await fetch(`${APPS_SCRIPT_URL}?action=getMensagens&idAtendimento=${idAtendimento}`);
         const data = await res.json();
         if (data.status === "sucesso") {
-          msgsEl.innerHTML = data.mensagens.map(m => {
+          const htmlMsg = data.mensagens.map(m => {
             const isCliente = m.remetenteTipo === 'Cliente';
+            let midiaHtml = "";
+
+            if (m.midiaUrl) {
+              const url = m.midiaUrl;
+              if (url.match(/\.(jpeg|jpg|gif|png|webp)/i) || url.includes('image')) {
+                midiaHtml = `<img src="${url}" class="max-w-xs rounded-lg mt-2 border border-slate-700">`;
+              } else if (url.match(/\.(mp3|ogg|wav|m4a)/i) || url.includes('audio')) {
+                midiaHtml = `<audio controls src="${url}" class="mt-2 w-64"></audio>`;
+              } else {
+                midiaHtml = `<a href="${url}" target="_blank" class="block mt-2 text-indigo-300 underline font-medium flex items-center space-x-1"><i class="fa-solid fa-file"></i> <span>Abrir Arquivo/PDF</span></a>`;
+              }
+            }
+
             return `
               <div class="flex ${isCliente ? 'justify-start' : 'justify-end'}">
                 <div class="max-w-[75%] rounded-2xl p-3.5 text-xs ${isCliente ? 'bg-slate-800 text-slate-200 rounded-tl-none' : 'bg-indigo-600 text-white rounded-tr-none'} shadow-md space-y-1">
                   <p class="font-semibold text-[10px] opacity-75">${m.nomeRemetente}</p>
                   <p class="leading-relaxed">${m.conteudo}</p>
+                  ${midiaHtml}
                 </div>
               </div>
             `;
           }).join('');
-          msgsEl.scrollTop = msgsEl.scrollHeight;
+
+          if (!isSilent || msgsEl.innerHTML !== htmlMsg) {
+            msgsEl.innerHTML = htmlMsg;
+            msgsEl.scrollTop = msgsEl.scrollHeight;
+          }
         }
       } catch (e) { console.error("Erro ao carregar mensagens:", e); }
     }
 
     async function assumirChat(idAtendimento) {
       if (!chatSelecionado) return;
-
-      // 1. Atualização Otimista Imediata na Interface
       chatSelecionado.atendente = usuarioLogado;
       chatSelecionado.status = 'Em Atendimento';
       atualizarBotoesAcao();
       renderizarListaChats();
 
-      // 2. Envio da requisição para o Google Apps Script em segundo plano
       try {
         await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ 
-            action: 'assumirAtendimento', 
-            idAtendimento: idAtendimento, 
-            emailAtendente: usuarioLogado 
-          })
+          body: JSON.stringify({ action: 'assumirAtendimento', idAtendimento: idAtendimento, emailAtendente: usuarioLogado })
         });
         await carregarChats();
-      } catch (err) {
-        console.error("Erro ao assumir atendimento:", err);
-      }
+      } catch (err) { console.error("Erro:", err); }
     }
 
     async function finalizarChat(idAtendimento) {
       if (!chatSelecionado) return;
-
       chatSelecionado.status = 'Finalizado';
       document.getElementById('chat-header').classList.add('hidden');
       document.getElementById('chat-input-box').classList.add('hidden');
@@ -277,38 +277,18 @@
         await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ 
-            action: 'finalizarAtendimento', 
-            idAtendimento: idAtendimento 
-          })
+          body: JSON.stringify({ action: 'finalizarAtendimento', idAtendimento: idAtendimento })
         });
         await carregarChats();
-      } catch (err) {
-        console.error("Erro ao finalizar atendimento:", err);
-      }
+      } catch (err) { console.error("Erro:", err); }
     }
 
     async function enviarMensagem() {
       const input = document.getElementById('message-input');
       const texto = input.value.trim();
       if (!texto || !chatSelecionado) return;
-
       input.value = '';
 
-      // 1. Renderização visual imediata do balão de resposta
-      const msgsEl = document.getElementById('chat-messages');
-      const tempId = 'temp-' + Date.now();
-      msgsEl.insertAdjacentHTML('beforeend', `
-        <div id="${tempId}" class="flex justify-end opacity-70">
-          <div class="max-w-[75%] rounded-2xl p-3.5 text-xs bg-indigo-600 text-white rounded-tr-none shadow-md space-y-1">
-            <p class="font-semibold text-[10px] opacity-75">${usuarioLogado}</p>
-            <p class="leading-relaxed">${texto}</p>
-          </div>
-        </div>
-      `);
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-
-      // 2. Envio HTTP para o Apps Script (dispara Evolution API e grava na planilha)
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
           method: 'POST',
@@ -320,21 +300,46 @@
             nomeAtendente: usuarioLogado
           })
         });
-
         const data = await res.json();
         if (data.status === 'sucesso') {
-          document.getElementById(tempId)?.remove();
-          await carregarMensagens(chatSelecionado.idAtendimento);
-        } else {
-          alert("Erro ao enviar: " + (data.mensagem || "Falha na resposta do servidor."));
+          await carregarMensagens(chatSelecionado.idAtendimento, false);
         }
-      } catch (err) {
-        console.error("Erro no envio:", err);
-        alert("Erro de conexão ao enviar mensagem.");
-      }
+      } catch (err) { alert("Erro de conexão ao enviar mensagem."); }
     }
 
-    // Evento para envio ao pressionar Enter (sem Shift)
+    async function enviarAnexo(fileInput) {
+      const file = fileInput.files[0];
+      if (!file || !chatSelecionado) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(e) {
+        const base64 = e.target.result.split(',')[1];
+        let tipoMidia = "document";
+        if (file.type.startsWith("image/")) tipoMidia = "image";
+        else if (file.type.startsWith("audio/")) tipoMidia = "audio";
+        else if (file.type.startsWith("video/")) tipoMidia = "video";
+
+        try {
+          await fetch(APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({
+              action: 'enviarResposta',
+              idAtendimento: chatSelecionado.idAtendimento,
+              textoResposta: file.name,
+              nomeAtendente: usuarioLogado,
+              midiaBase64: base64,
+              tipoMidia: tipoMidia,
+              nomeArquivo: file.name
+            })
+          });
+          fileInput.value = '';
+          await carregarMensagens(chatSelecionado.idAtendimento, false);
+        } catch (err) { alert("Erro ao enviar anexo."); }
+      };
+      reader.readAsDataURL(file);
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       const input = document.getElementById('message-input');
       if (input) {
