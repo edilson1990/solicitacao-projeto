@@ -95,6 +95,15 @@
           Histórico
         </button>
       </div>
+
+      <!-- CAMPO DE PESQUISA -->
+      <div class="p-2.5 border-b border-slate-800 bg-slate-950/70 shrink-0">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+          <input type="text" id="search-input" oninput="renderizarListaChats()" placeholder="Pesquisar por nome, número ou mensagem..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+        </div>
+      </div>
+
       <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-slate-800/50 min-h-0">
         <div class="p-8 text-center text-slate-500 text-xs">Carregando chamados...</div>
       </div>
@@ -365,6 +374,7 @@
 
     function renderizarListaChats() {
       const listEl = document.getElementById('chat-list');
+      const termoBusca = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
       let filtrados = [];
 
       if (abaAtual === 'filaGeral') {
@@ -375,11 +385,83 @@
         filtrados = todosChats.filter(c => String(c.status).trim() === 'Finalizado');
       }
 
+      // FILTRO DE PESQUISA EM TEMPO REAL
+      if (termoBusca) {
+        filtrados = filtrados.filter(c => 
+          String(c.nomeCliente || '').toLowerCase().includes(termoBusca) ||
+          String(c.telefone || '').toLowerCase().includes(termoBusca) ||
+          String(c.ultimaMensagem || '').toLowerCase().includes(termoBusca)
+        );
+      }
+
       if (filtrados.length === 0) {
-        listEl.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">Nenhum chamado nesta fila.</div>`;
+        listEl.innerHTML = `<div class="p-8 text-center text-slate-500 text-xs">Nenhum chamado encontrado.</div>`;
         return;
       }
 
+      // RENDERIZAÇÃO DA ABA HISTÓRICO AGRUPADA POR CLIENTE
+      if (abaAtual === 'historico') {
+        const gruposClientes = {};
+        filtrados.forEach(c => {
+          const chave = String(c.telefone || c.nomeCliente).trim();
+          if (!gruposClientes[chave]) {
+            gruposClientes[chave] = {
+              cliente: c.nomeCliente,
+              telefone: c.telefone,
+              fotoPerfil: c.fotoPerfil,
+              canal: c.canal,
+              chamados: [],
+              ultimaData: c.dataAtualizacao || c.dataCriacao,
+              ultimaMensagem: c.ultimaMensagem
+            };
+          }
+          gruposClientes[chave].chamados.push(c);
+        });
+
+        const listaAgrupada = Object.values(gruposClientes);
+
+        listEl.innerHTML = listaAgrupada.map(g => {
+          const nomeStr = String(g.cliente || 'Cliente').trim();
+          const canalStr = String(g.canal || 'WhatsApp').trim();
+          const isGroup = canalStr.includes('Grupo') || String(g.telefone).startsWith('120363');
+          const totalAtendimentos = g.chamados.length;
+          const iniciais = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
+          const horaStr = formatarDataLista(g.ultimaData);
+
+          const idsConcat = g.chamados.map(ch => ch.idAtendimento).join(',');
+          const isSelected = chatSelecionado && g.chamados.some(ch => ch.idAtendimento === chatSelecionado.idAtendimento);
+
+          let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${iniciais}</div>`;
+          if (g.fotoPerfil && String(g.fotoPerfil).startsWith('http')) {
+            avatarHtml = `
+              <div class="relative w-9 h-9 shrink-0">
+                <img src="${g.fotoPerfil}" class="w-9 h-9 rounded-full object-cover border border-slate-700" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                <div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border hidden items-center justify-center font-bold text-xs">${iniciais}</div>
+              </div>`;
+          }
+
+          return `
+            <div onclick="abrirHistoricoCliente('${idsConcat}', '${g.chamados[0].idAtendimento}')" class="p-3.5 hover:bg-slate-900/80 cursor-pointer transition flex items-center space-x-3 ${isSelected ? 'bg-slate-900 border-l-4 border-indigo-500' : ''}">
+              ${avatarHtml}
+              <div class="flex-1 min-w-0">
+                <div class="flex justify-between items-center">
+                  <span class="font-semibold text-slate-200 text-xs truncate max-w-[130px]">${nomeStr}</span>
+                  <span class="text-[10px] text-slate-400 font-medium">${horaStr}</span>
+                </div>
+                <div class="flex justify-between items-center mt-1">
+                  <p class="text-[11px] text-slate-400 truncate pr-2">${g.ultimaMensagem || 'Histórico finalizado'}</p>
+                  <div class="flex items-center space-x-1 shrink-0">
+                    <span class="text-[9px] bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded-full font-bold border border-slate-700/60" title="${totalAtendimentos} atendimento(s) finalizado(s)">${totalAtendimentos} ${totalAtendimentos > 1 ? 'atends' : 'atend'}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+        return;
+      }
+
+      // RENDERIZAÇÃO DAS ABAS FILA GERAL E MEUS
       listEl.innerHTML = filtrados.map(c => {
         const nomeStr = String(c.nomeCliente || 'Cliente').trim();
         const canalStr = String(c.canal || 'WhatsApp').trim();
@@ -451,6 +533,44 @@
       carregarMensagens(idAtendimento, false);
     }
 
+    async function abrirHistoricoCliente(idsConcat, idUltimoChamado) {
+      chatSelecionado = todosChats.find(c => c.idAtendimento === idUltimoChamado);
+      if (!chatSelecionado) return;
+
+      document.getElementById('sidebar').classList.add('hidden', 'md:flex');
+      document.getElementById('chat-main').classList.remove('hidden');
+      document.getElementById('chat-main').classList.add('flex');
+
+      renderizarListaChats();
+      document.getElementById('chat-header').classList.remove('hidden');
+      
+      const isFinalizado = String(chatSelecionado.status).trim() === 'Finalizado';
+      if (isFinalizado) {
+        document.getElementById('chat-input-box').classList.add('hidden');
+      } else {
+        document.getElementById('chat-input-box').classList.remove('hidden');
+      }
+      
+      const nomeStr = String(chatSelecionado.nomeCliente || 'Cliente');
+      document.getElementById('chat-client-name').innerText = nomeStr + " (Histórico)";
+      document.getElementById('chat-client-phone').innerText = (chatSelecionado.telefone || '') + " • " + (chatSelecionado.canal || 'WhatsApp');
+
+      const imgEl = document.getElementById('chat-avatar-img');
+      const initialsEl = document.getElementById('chat-avatar-initials');
+      if (chatSelecionado.fotoPerfil && String(chatSelecionado.fotoPerfil).startsWith('http')) {
+        imgEl.src = chatSelecionado.fotoPerfil;
+        imgEl.classList.remove('hidden');
+        initialsEl.classList.add('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+        initialsEl.innerText = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
+        initialsEl.classList.remove('hidden');
+      }
+
+      atualizarBotoesAcao();
+      carregarMensagens(idsConcat, false);
+    }
+
     function voltarMobile() {
       document.getElementById('sidebar').classList.remove('hidden');
       document.getElementById('chat-main').classList.add('hidden');
@@ -466,6 +586,8 @@
       } else if (String(chatSelecionado.status).trim() !== 'Finalizado') {
         html += `<button onclick="abrirModalTransferir()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Transferir</button>`;
         html += `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar</button>`;
+      } else {
+        html += `<span class="bg-slate-800 text-slate-400 text-xs font-semibold px-3 py-1.5 rounded-lg">Chamado Finalizado</span>`;
       }
       actionsEl.innerHTML = html;
     }
