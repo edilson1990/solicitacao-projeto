@@ -34,17 +34,16 @@
     </div>
   </div>
 
-  <!-- CABEÇALHO COM LOGO DE ALTO CONTRASTE E INDICADORES (KPIS) -->
+  <!-- CABEÇALHO SUPERIOR -->
   <header class="bg-slate-950 border-b border-slate-800 px-4 py-2.5 flex justify-between items-center shrink-0">
     <div class="flex items-center space-x-3">
-      <!-- CARD CLARO PARA DESTACAR O NOME PROATIVA SOLUTIONS -->
       <div class="bg-white/95 px-3 py-1 rounded-lg flex items-center shadow-sm">
         <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-6 w-auto object-contain">
       </div>
       <span class="text-xs font-bold text-slate-300 border-l border-slate-800 pl-3 hidden sm:inline">Central Omnichannel</span>
     </div>
 
-    <!-- CARDS INDICADORES DE DESEMPENHO (KPIS) -->
+    <!-- KPIS INDICADORES -->
     <div class="hidden lg:flex items-center space-x-3">
       <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center">
         <span class="text-[10px] text-slate-400 block uppercase font-semibold">Fila Geral</span>
@@ -60,7 +59,7 @@
       </div>
     </div>
 
-    <!-- SINO DE NOTIFICAÇÃO E PERFIL -->
+    <!-- SINO E PERFIL -->
     <div class="flex items-center space-x-3">
       <div class="relative cursor-pointer p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition" title="Mensagens pendentes de resposta">
         <i class="fa-solid fa-bell text-slate-300 text-sm"></i>
@@ -74,10 +73,10 @@
     </div>
   </header>
 
-  <!-- PAINEL DE ATENDIMENTO RESPONSIVO -->
+  <!-- PAINEL PRINCIPAL -->
   <div id="app-container" class="flex-1 flex overflow-hidden relative">
     
-    <!-- BARRA LATERAL (LISTA DE CHATS) -->
+    <!-- BARRA LATERAL -->
     <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
       <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950">
         <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">Fila Geral</button>
@@ -89,21 +88,19 @@
       </div>
     </aside>
 
-    <!-- ÁREA DE CHAT ATIVO -->
+    <!-- ÁREA DE CHAT -->
     <main id="chat-main" class="hidden md:flex flex-1 flex-col bg-slate-900/40 relative">
       
-      <!-- CABEÇALHO DA CONVERSA -->
+      <!-- CABEÇALHO DO CHAT -->
       <div id="chat-header" class="p-3 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
         <div class="flex items-center space-x-3">
-          <!-- BOTÃO VOLTAR NO MOBILE -->
           <button onclick="voltarMobile()" class="md:hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">
             <i class="fa-solid fa-arrow-left mr-1"></i> Voltar
           </button>
           
-          <!-- AVATAR DO CONTATO OU GRUPO -->
           <div id="chat-avatar-container" class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300 overflow-hidden shrink-0">
             <span id="chat-avatar-initials"></span>
-            <img id="chat-avatar-img" class="w-full h-full object-cover hidden" alt="Perfil">
+            <img id="chat-avatar-img" class="w-full h-full object-cover hidden" alt="Perfil" onerror="this.classList.add('hidden'); document.getElementById('chat-avatar-initials').classList.remove('hidden');">
           </div>
           <div class="min-w-0">
             <h2 id="chat-client-name" class="font-bold text-white text-sm truncate"></h2>
@@ -113,14 +110,14 @@
         <div class="flex items-center space-x-2" id="chat-actions"></div>
       </div>
 
-      <!-- CORPO DAS MENSAGENS -->
+      <!-- MENSAGENS DO CHAT -->
       <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         <div class="h-full flex items-center justify-center text-slate-500 text-xs">
           Selecione uma conversa para iniciar o atendimento.
         </div>
       </div>
 
-      <!-- INPUT DE ENVIOS (TEXTO E ANEXOS) -->
+      <!-- INPUT DE DIGITAÇÃO -->
       <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 hidden">
         <div class="flex items-center space-x-2">
           <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
@@ -128,7 +125,7 @@
             <i class="fa-solid fa-paperclip text-sm"></i>
           </button>
           <textarea id="message-input" rows="1" placeholder="Digite sua resposta..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
-          <button onclick="enviarMensagem()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center justify-center">
+          <button id="btn-send-msg" onclick="enviarMensagem()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center justify-center">
             <i class="fa-solid fa-paper-plane text-sm"></i>
           </button>
         </div>
@@ -136,7 +133,7 @@
     </main>
   </div>
 
-  <!-- MODAL DE TRANSFERÊNCIA DE CHAMADO -->
+  <!-- MODAL DE TRANSFERÊNCIA -->
   <div id="transfer-modal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4">
       <h3 class="text-sm font-bold text-white">Transferir Atendimento</h3>
@@ -216,7 +213,6 @@
       const naFila = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado').length;
       const meus = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado').length;
       
-      // Soma apenas mensagens pendentes de chamados ativos
       const totalNaoLidas = todosChats.reduce((acc, c) => {
         return (String(c.status).trim() !== 'Finalizado') ? acc + (Number(c.naoLidas) || 0) : acc;
       }, 0);
@@ -253,14 +249,18 @@
       listEl.innerHTML = filtrados.map(c => {
         const nomeStr = String(c.nomeCliente || 'Cliente').trim();
         const canalStr = String(c.canal || 'WhatsApp').trim();
-        const isGroup = canalStr.includes('Grupo');
+        const isGroup = canalStr.includes('Grupo') || String(c.telefone).startsWith('120363');
         const badgeNaoLidas = c.naoLidas > 0 ? `<span class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-1.5 py-0.5 rounded-full">${c.naoLidas}</span>` : '';
         const isSelected = chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento;
         const iniciais = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
 
         let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${iniciais}</div>`;
         if (c.fotoPerfil && String(c.fotoPerfil).startsWith('http')) {
-          avatarHtml = `<img src="${c.fotoPerfil}" class="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-700">`;
+          avatarHtml = `
+            <div class="relative w-9 h-9 shrink-0">
+              <img src="${c.fotoPerfil}" class="w-9 h-9 rounded-full object-cover border border-slate-700" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+              <div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border hidden items-center justify-center font-bold text-xs">${iniciais}</div>
+            </div>`;
         }
 
         return `
@@ -269,7 +269,7 @@
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-center">
                 <span class="font-semibold text-slate-200 text-xs truncate max-w-[140px]">${nomeStr}</span>
-                <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${isGroup ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${canalStr}</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${isGroup ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${isGroup ? 'WhatsApp Grupo' : canalStr}</span>
               </div>
               <div class="flex justify-between items-center mt-1">
                 <p class="text-[11px] text-slate-400 truncate pr-2">${c.ultimaMensagem || 'Sem mensagens'}</p>
@@ -434,7 +434,10 @@
       const input = document.getElementById('message-input');
       const texto = input.value.trim();
       if (!texto || !chatSelecionado) return;
-      input.value = '';
+
+      const btnSend = document.getElementById('btn-send-msg');
+      btnSend.disabled = true;
+      btnSend.style.opacity = '0.6';
 
       try {
         const res = await fetch(APPS_SCRIPT_URL, {
@@ -447,11 +450,26 @@
             nomeAtendente: usuarioLogado
           })
         });
+
         const data = await res.json();
         if (data.status === 'sucesso') {
+          input.value = '';
+          chatSelecionado.atendente = usuarioLogado;
+          chatSelecionado.status = 'Em Atendimento';
+          chatSelecionado.naoLidas = 0;
+          
+          atualizarBotoesAcao();
           await carregarMensagens(chatSelecionado.idAtendimento, false);
+          await carregarChats();
+        } else {
+          alert("Não foi possível enviar a mensagem: " + (data.mensagem || "Erro no servidor."));
         }
-      } catch (err) { alert("Erro de conexão ao enviar mensagem."); }
+      } catch (err) { 
+        alert("Erro de conexão ao enviar mensagem. Tente novamente."); 
+      } finally {
+        btnSend.disabled = false;
+        btnSend.style.opacity = '1';
+      }
     }
 
     async function enviarAnexo(fileInput) {
@@ -482,6 +500,7 @@
           });
           fileInput.value = '';
           await carregarMensagens(chatSelecionado.idAtendimento, false);
+          await carregarChats();
         } catch (err) { alert("Erro ao enviar anexo."); }
       };
       reader.readAsDataURL(file);
