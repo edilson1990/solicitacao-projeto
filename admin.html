@@ -2,13 +2,13 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Proativa Solutions — Central Omnichannel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-slate-900 text-slate-100 font-sans h-[100dvh] flex flex-col overflow-hidden">
 
   <!-- TELA DE LOGIN GOOGLE -->
   <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
@@ -35,7 +35,7 @@
   </div>
 
   <!-- CABEÇALHO SUPERIOR -->
-  <header class="bg-slate-950 border-b border-slate-800 px-4 py-2.5 flex justify-between items-center shrink-0">
+  <header class="bg-slate-950 border-b border-slate-800 px-4 py-2.5 flex justify-between items-center shrink-0 z-10">
     <div class="flex items-center space-x-3">
       <div class="bg-white/95 px-3 py-1 rounded-lg flex items-center shadow-sm">
         <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-6 w-auto object-contain">
@@ -43,7 +43,7 @@
       <span class="text-xs font-bold text-slate-300 border-l border-slate-800 pl-3 hidden sm:inline">Central Omnichannel</span>
     </div>
 
-    <!-- KPIS INDICADORES -->
+    <!-- CARDS DE KPIS -->
     <div class="hidden lg:flex items-center space-x-3">
       <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center">
         <span class="text-[10px] text-slate-400 block uppercase font-semibold">Fila Geral</span>
@@ -76,23 +76,31 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="app-container" class="flex-1 flex overflow-hidden relative">
     
-    <!-- BARRA LATERAL -->
-    <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
-      <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950">
-        <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">Fila Geral</button>
-        <button onclick="setFila('meus')" id="tab-meus" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Meus</button>
-        <button onclick="setFila('historico')" id="tab-historico" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Histórico</button>
+    <!-- BARRA LATERAL (LISTA DE CHATS COM NOTIFICAÇÕES POR ABA) -->
+    <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0 h-full">
+      <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950 shrink-0">
+        <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition flex items-center justify-center space-x-1">
+          <span>Fila Geral</span>
+          <span id="badge-tab-filaGeral" class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+        </button>
+        <button onclick="setFila('meus')" id="tab-meus" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition flex items-center justify-center space-x-1">
+          <span>Meus</span>
+          <span id="badge-tab-meus" class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-1.5 py-0.2 rounded-full hidden">0</span>
+        </button>
+        <button onclick="setFila('historico')" id="tab-historico" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">
+          Histórico
+        </button>
       </div>
-      <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-slate-800/50">
+      <div id="chat-list" class="flex-1 overflow-y-auto divide-y divide-slate-800/50 min-h-0">
         <div class="p-8 text-center text-slate-500 text-xs">Carregando chamados...</div>
       </div>
     </aside>
 
-    <!-- ÁREA DE CHAT -->
-    <main id="chat-main" class="hidden md:flex flex-1 flex-col bg-slate-900/40 relative">
+    <!-- ÁREA DE CHAT ATIVO -->
+    <main id="chat-main" class="hidden md:flex flex-1 flex-col bg-slate-900/40 relative h-full min-h-0 overflow-hidden">
       
       <!-- CABEÇALHO DO CHAT -->
-      <div id="chat-header" class="p-3 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
+      <div id="chat-header" class="p-3 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center shrink-0 hidden">
         <div class="flex items-center space-x-3">
           <button onclick="voltarMobile()" class="md:hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">
             <i class="fa-solid fa-arrow-left mr-1"></i> Voltar
@@ -111,17 +119,17 @@
       </div>
 
       <!-- MENSAGENS DO CHAT -->
-      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 min-h-0">
         <div class="h-full flex items-center justify-center text-slate-500 text-xs">
           Selecione uma conversa para iniciar o atendimento.
         </div>
       </div>
 
-      <!-- INPUT DE DIGITAÇÃO -->
-      <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 hidden">
+      <!-- INPUT DE RESPOSTA (FIXADO NA PARTE INFERIOR) -->
+      <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 shrink-0 hidden">
         <div class="flex items-center space-x-2">
           <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
-          <button onclick="document.getElementById('file-input').click()" title="Anexar arquivo/imagem" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition">
+          <button onclick="document.getElementById('file-input').click()" title="Anexar arquivo/imagem/vídeo/PDF" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition">
             <i class="fa-solid fa-paperclip text-sm"></i>
           </button>
           <textarea id="message-input" rows="1" placeholder="Digite sua resposta..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
@@ -190,9 +198,12 @@
     function setFila(fila) {
       abaAtual = fila;
       ['filaGeral', 'meus', 'historico'].forEach(f => {
-        document.getElementById('tab-' + f).className = (f === fila) 
-          ? "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition"
-          : "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition";
+        const btn = document.getElementById('tab-' + f);
+        if (f === fila) {
+          btn.className = "py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition flex items-center justify-center space-x-1";
+        } else {
+          btn.className = "py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition flex items-center justify-center space-x-1";
+        }
       });
       renderizarListaChats();
     }
@@ -210,22 +221,39 @@
     }
 
     function atualizarKPIs() {
-      const naFila = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado').length;
-      const meus = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado').length;
-      
-      const totalNaoLidas = todosChats.reduce((acc, c) => {
-        return (String(c.status).trim() !== 'Finalizado') ? acc + (Number(c.naoLidas) || 0) : acc;
-      }, 0);
+      const naFila = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado');
+      const meus = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado');
 
-      document.getElementById('kpi-fila').innerText = naFila;
-      document.getElementById('kpi-meus').innerText = meus;
-      
-      const badge = document.getElementById('notif-badge');
-      if (totalNaoLidas > 0) {
-        badge.innerText = totalNaoLidas > 99 ? '99+' : totalNaoLidas;
-        badge.classList.remove('hidden');
+      const somaFila = naFila.reduce((acc, c) => acc + (Number(c.naoLidas) || 0), 0);
+      const somaMeus = meus.reduce((acc, c) => acc + (Number(c.naoLidas) || 0), 0);
+
+      document.getElementById('kpi-fila').innerText = naFila.length;
+      document.getElementById('kpi-meus').innerText = meus.length;
+
+      // Atualiza os balões de notificação nas abas laterais
+      const badgeFila = document.getElementById('badge-tab-filaGeral');
+      if (somaFila > 0) {
+        badgeFila.innerText = somaFila;
+        badgeFila.classList.remove('hidden');
       } else {
-        badge.classList.add('hidden');
+        badgeFila.classList.add('hidden');
+      }
+
+      const badgeMeus = document.getElementById('badge-tab-meus');
+      if (somaMeus > 0) {
+        badgeMeus.innerText = somaMeus;
+        badgeMeus.classList.remove('hidden');
+      } else {
+        badgeMeus.classList.add('hidden');
+      }
+      
+      const totalNaoLidas = somaFila + somaMeus;
+      const badgeHeader = document.getElementById('notif-badge');
+      if (totalNaoLidas > 0) {
+        badgeHeader.innerText = totalNaoLidas > 99 ? '99+' : totalNaoLidas;
+        badgeHeader.classList.remove('hidden');
+      } else {
+        badgeHeader.classList.add('hidden');
       }
     }
 
@@ -345,11 +373,13 @@
             if (m.midiaUrl) {
               const url = String(m.midiaUrl);
               if (url.match(/\.(jpeg|jpg|gif|png|webp)/i) || url.includes('image')) {
-                midiaHtml = `<img src="${url}" class="max-w-xs rounded-lg mt-2 border border-slate-700">`;
+                midiaHtml = `<img src="${url}" class="max-w-xs rounded-xl mt-2 border border-slate-700">`;
               } else if (url.match(/\.(mp3|ogg|wav|m4a)/i) || url.includes('audio')) {
-                midiaHtml = `<audio controls src="${url}" class="mt-2 w-64"></audio>`;
+                midiaHtml = `<audio controls src="${url}" class="mt-2 w-full max-w-xs"></audio>`;
+              } else if (url.match(/\.(mp4|webm)/i) || url.includes('video')) {
+                midiaHtml = `<video controls src="${url}" class="mt-2 w-full max-w-xs rounded-xl border border-slate-700"></video>`;
               } else {
-                midiaHtml = `<a href="${url}" target="_blank" class="block mt-2 text-indigo-300 underline font-medium flex items-center space-x-1"><i class="fa-solid fa-file"></i> <span>Abrir Arquivo/PDF</span></a>`;
+                midiaHtml = `<a href="${url}" target="_blank" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-950 text-indigo-300 px-3 py-2 rounded-lg text-xs font-medium mt-2 border border-slate-800"><i class="fa-solid fa-file-pdf text-rose-400 text-sm"></i><span>Abrir Arquivo / PDF</span></a>`;
               }
             }
 
