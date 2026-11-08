@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Proativa Solutions — Painel Omnichannel</title>
+  <title>Proativa Solutions — Central Omnichannel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -14,11 +14,11 @@
   <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
       <div class="flex justify-center">
-        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa" class="h-12">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-14 object-contain">
       </div>
       <div>
-        <h1 class="text-xl font-bold text-white">Painel Administrativo Proativa</h1>
-        <p class="text-slate-400 text-sm mt-1">Acesso restrito para equipe de atendimento</p>
+        <h1 class="text-xl font-bold text-white">Central Omnichannel Proativa</h1>
+        <p class="text-slate-400 text-sm mt-1">Acesso restrito para a equipe de atendimento</p>
       </div>
       <div id="g_id_onload"
            data-client_id="698900358884-lqfh1vlne9u6hq2rnip2q28jva1f4dsg.apps.googleusercontent.com"
@@ -32,24 +32,50 @@
     </div>
   </div>
 
-  <!-- CABEÇALHO -->
-  <header class="bg-slate-950 border-b border-slate-800 px-6 py-3 flex justify-between items-center shrink-0">
+  <!-- CABEÇALHO COM INDICADORES (KPIS) E LOGO CORRIGIDO -->
+  <header class="bg-slate-950 border-b border-slate-800 px-4 py-2.5 flex justify-between items-center shrink-0">
     <div class="flex items-center space-x-3">
-      <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Logo" class="h-8">
-      <span class="text-sm font-semibold text-slate-300 border-l border-slate-800 pl-3">Central Omnichannel</span>
+      <div class="bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 flex items-center">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa" class="h-7 w-auto object-contain">
+      </div>
+      <span class="text-xs font-bold text-slate-300 border-l border-slate-800 pl-3 hidden sm:inline">Central Omnichannel</span>
     </div>
-    <div class="flex items-center space-x-4">
+
+    <!-- CARDS INDICADORES DE DESEMPENHO (KPIS) -->
+    <div class="hidden lg:flex items-center space-x-3">
+      <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center">
+        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Fila Geral</span>
+        <span id="kpi-fila" class="text-xs font-bold text-amber-400">0</span>
+      </div>
+      <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center">
+        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Meus Chamados</span>
+        <span id="kpi-meus" class="text-xs font-bold text-indigo-400">0</span>
+      </div>
+      <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center">
+        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Tempo Média Fila</span>
+        <span id="kpi-tme" class="text-xs font-bold text-emerald-400">0 min</span>
+      </div>
+    </div>
+
+    <!-- SINO DE NOTIFICAÇÃO E PERFIL -->
+    <div class="flex items-center space-x-3">
+      <div class="relative cursor-pointer p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition" title="Notificações Pendentes">
+        <i class="fa-solid fa-bell text-slate-300 text-sm"></i>
+        <span id="notif-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-slate-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+      </div>
       <div class="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-        <span id="user-email-display" class="text-xs text-slate-300 font-medium"></span>
+        <span id="user-email-display" class="text-xs text-slate-300 font-medium max-w-[120px] sm:max-w-none truncate"></span>
       </div>
       <button onclick="logout()" class="text-slate-400 hover:text-white text-xs font-semibold px-2 py-1 transition">Sair</button>
     </div>
   </header>
 
-  <!-- PAINEL DE ATENDIMENTO -->
-  <div id="app-container" class="flex-1 flex overflow-hidden">
-    <aside class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
+  <!-- PAINEL DE ATENDIMENTO RESPONSIVO -->
+  <div id="app-container" class="flex-1 flex overflow-hidden relative">
+    
+    <!-- BARRA LATERAL (LISTA DE CHATS) -->
+    <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0">
       <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950">
         <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition">Fila Geral</button>
         <button onclick="setFila('meus')" id="tab-meus" class="py-2 text-xs font-semibold rounded-lg text-slate-400 hover:bg-slate-900 transition">Meus</button>
@@ -60,27 +86,39 @@
       </div>
     </aside>
 
-    <main class="flex-1 flex flex-col bg-slate-900/40 relative">
-      <div id="chat-header" class="p-4 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
+    <!-- ÁREA DE CHAT ATIVO -->
+    <main id="chat-main" class="hidden md:flex flex-1 flex-col bg-slate-900/40 relative">
+      
+      <!-- CABEÇALHO DA CONVERSA -->
+      <div id="chat-header" class="p-3 border-b border-slate-800 bg-slate-950/80 flex justify-between items-center hidden">
         <div class="flex items-center space-x-3">
-          <div id="chat-avatar" class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300"></div>
-          <div>
-            <h2 id="chat-client-name" class="font-bold text-white text-sm"></h2>
-            <p id="chat-client-phone" class="text-xs text-slate-400"></p>
+          <!-- BOTÃO VOLTAR NO MOBILE -->
+          <button onclick="voltarMobile()" class="md:hidden bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-1.5 rounded-lg text-xs font-semibold">
+            <i class="fa-solid fa-arrow-left mr-1"></i> Voltar
+          </button>
+          
+          <!-- AVATAR DO CONTATO OU GRUPO -->
+          <div id="chat-avatar-container" class="w-10 h-10 rounded-full bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center font-bold text-indigo-300 overflow-hidden shrink-0">
+            <span id="chat-avatar-initials"></span>
+            <img id="chat-avatar-img" class="w-full h-full object-cover hidden" alt="Perfil">
+          </div>
+          <div class="min-w-0">
+            <h2 id="chat-client-name" class="font-bold text-white text-sm truncate"></h2>
+            <p id="chat-client-phone" class="text-xs text-slate-400 truncate"></p>
           </div>
         </div>
-        <div class="flex space-x-2" id="chat-actions"></div>
+        <div class="flex items-center space-x-2" id="chat-actions"></div>
       </div>
 
-      <!-- CORPO DA CONVERSA -->
-      <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+      <!-- CORPO DAS MENSAGENS -->
+      <div id="chat-messages" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
         <div class="h-full flex items-center justify-center text-slate-500 text-xs">
           Selecione uma conversa para iniciar o atendimento.
         </div>
       </div>
 
-      <!-- INPUT DE RESPOSTA + BOTÃO DE ANEXOS -->
-      <div id="chat-input-box" class="p-4 border-t border-slate-800 bg-slate-950 hidden">
+      <!-- INPUT DE ENVIOS (TEXTO E ANEXOS) -->
+      <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 hidden">
         <div class="flex items-center space-x-2">
           <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
           <button onclick="document.getElementById('file-input').click()" title="Anexar arquivo/imagem" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition">
@@ -95,9 +133,27 @@
     </main>
   </div>
 
+  <!-- MODAL DE TRANSFERÊNCIA DE CHAMADO -->
+  <div id="transfer-modal" class="fixed inset-0 bg-slate-950/80 z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-sm w-full space-y-4">
+      <h3 class="text-sm font-bold text-white">Transferir Atendimento</h3>
+      <p class="text-xs text-slate-400">Selecione o novo atendente ou devolva para a Fila Geral:</p>
+      <select id="transfer-select" class="w-full bg-slate-950 border border-slate-800 rounded-xl p-3 text-xs text-slate-200 focus:outline-none">
+        <option value="Fila Geral">Fila Geral (Devolver)</option>
+        <option value="solutionsproativa@gmail.com">solutionsproativa@gmail.com</option>
+        <option value="edilsonfpcavalcanti@gmail.com">edilsonfpcavalcanti@gmail.com</option>
+        <option value="andreza.jp.pb@gmail.com">andreza.jp.pb@gmail.com</option>
+      </select>
+      <div class="flex justify-end space-x-2 pt-2">
+        <button onclick="fecharModalTransferir()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
+        <button onclick="confirmarTransferencia()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1BNA4pXax4OmVLZLH51pi58lEZoh2wHCKTVvlopFYYp6MhznnfHSwZLTWWTz8yLN4/exec";
-    const EMAILS_AUTORIZADOS = ["solutionsproativa@gmail.com", "edilsonfpcavalcanti@gmail.com", "ednaldofcavalcanti@gmail.com"];
+    const EMAILS_AUTORIZADOS = ["solutionsproativa@gmail.com", "edilsonfpcavalcanti@gmail.com", "andreza.jp.pb@gmail.com"];
 
     let usuarioLogado = null;
     let abaAtual = 'filaGeral';
@@ -118,7 +174,6 @@
         document.getElementById('login-container').classList.add('hidden');
         carregarChats();
         
-        // Loop de sincronização em tempo real (4 segundos)
         setInterval(() => {
           carregarChats();
           if (chatSelecionado) carregarMensagens(chatSelecionado.idAtendimento, true);
@@ -148,9 +203,27 @@
         const data = await res.json();
         if (data.status === "sucesso") {
           todosChats = data.chats;
+          atualizarKPIs();
           renderizarListaChats();
         }
       } catch (e) { console.error("Erro ao carregar chats:", e); }
+    }
+
+    function atualizarKPIs() {
+      const naFila = todosChats.filter(c => c.atendente === 'Fila Geral' && c.status !== 'Finalizado').length;
+      const meus = todosChats.filter(c => c.atendente === usuarioLogado && c.status !== 'Finalizado').length;
+      const totalNaoLidas = todosChats.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+
+      document.getElementById('kpi-fila').innerText = naFila;
+      document.getElementById('kpi-meus').innerText = meus;
+      
+      const badge = document.getElementById('notif-badge');
+      if (totalNaoLidas > 0) {
+        badge.innerText = totalNaoLidas > 99 ? '99+' : totalNaoLidas;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
     }
 
     function renderizarListaChats() {
@@ -170,43 +243,82 @@
         return;
       }
 
-      listEl.innerHTML = filtrados.map(c => `
-        <div onclick="abrirChat('${c.idAtendimento}')" class="p-4 hover:bg-slate-900/80 cursor-pointer transition flex justify-between items-start space-x-3 ${chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento ? 'bg-slate-900 border-l-4 border-indigo-500' : ''}">
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center space-x-2">
-              <span class="font-semibold text-slate-200 text-sm truncate">${c.nomeCliente}</span>
-              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold ${c.canal === 'Instagram' ? 'bg-pink-500/20 text-pink-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.canal}</span>
+      listEl.innerHTML = filtrados.map(c => {
+        const isGroup = c.canal.includes('Grupo');
+        const badgeNaoLidas = c.naoLidas > 0 ? `<span class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-1.5 py-0.5 rounded-full">${c.naoLidas}</span>` : '';
+        const isSelected = chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento;
+
+        let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${c.nomeCliente.substring(0, 2).toUpperCase()}</div>`;
+        if (c.fotoPerfil) {
+          avatarHtml = `<img src="${c.fotoPerfil}" class="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-700">`;
+        }
+
+        return `
+          <div onclick="abrirChat('${c.idAtendimento}')" class="p-3.5 hover:bg-slate-900/80 cursor-pointer transition flex items-center space-x-3 ${isSelected ? 'bg-slate-900 border-l-4 border-indigo-500' : ''}">
+            ${avatarHtml}
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-center">
+                <span class="font-semibold text-slate-200 text-xs truncate max-w-[140px]">${c.nomeCliente}</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${isGroup ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.canal}</span>
+              </div>
+              <div class="flex justify-between items-center mt-1">
+                <p class="text-[11px] text-slate-400 truncate pr-2">${c.ultimaMensagem || 'Sem mensagens'}</p>
+                ${badgeNaoLidas}
+              </div>
             </div>
-            <p class="text-xs text-slate-400 truncate mt-1">${c.ultimaMensagem || 'Sem mensagens'}</p>
           </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     async function abrirChat(idAtendimento) {
       chatSelecionado = todosChats.find(c => c.idAtendimento === idAtendimento);
       if (!chatSelecionado) return;
 
+      // COMPORTAMENTO RESPONSIVO NO MOBILE
+      document.getElementById('sidebar').classList.add('hidden', 'md:flex');
+      document.getElementById('chat-main').classList.remove('hidden');
+      document.getElementById('chat-main').classList.add('flex');
+
       renderizarListaChats();
       document.getElementById('chat-header').classList.remove('hidden');
       document.getElementById('chat-input-box').classList.remove('hidden');
       document.getElementById('chat-client-name').innerText = chatSelecionado.nomeCliente;
       document.getElementById('chat-client-phone').innerText = chatSelecionado.telefone + " • " + chatSelecionado.canal;
-      document.getElementById('chat-avatar').innerText = chatSelecionado.nomeCliente.substring(0, 2).toUpperCase();
+
+      const imgEl = document.getElementById('chat-avatar-img');
+      const initialsEl = document.getElementById('chat-avatar-initials');
+      if (chatSelecionado.fotoPerfil) {
+        imgEl.src = chatSelecionado.fotoPerfil;
+        imgEl.classList.remove('hidden');
+        initialsEl.classList.add('hidden');
+      } else {
+        imgEl.classList.add('hidden');
+        initialsEl.innerText = chatSelecionado.nomeCliente.substring(0, 2).toUpperCase();
+        initialsEl.classList.remove('hidden');
+      }
 
       atualizarBotoesAcao();
       carregarMensagens(idAtendimento, false);
+    }
+
+    function voltarMobile() {
+      document.getElementById('sidebar').classList.remove('hidden');
+      document.getElementById('chat-main').classList.add('hidden');
     }
 
     function atualizarBotoesAcao() {
       if (!chatSelecionado) return;
       const actionsEl = document.getElementById('chat-actions');
 
+      let html = '';
       if (chatSelecionado.atendente === 'Fila Geral' && chatSelecionado.status !== 'Finalizado') {
-        actionsEl.innerHTML = `<button onclick="assumirChat('${chatSelecionado.idAtendimento}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Assumir Chamado</button>`;
+        html += `<button onclick="assumirChat('${chatSelecionado.idAtendimento}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Assumir Chamado</button>`;
       } else if (chatSelecionado.status !== 'Finalizado') {
-        actionsEl.innerHTML = `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar Atendimento</button>`;
-      } else { actionsEl.innerHTML = ''; }
+        html += `<button onclick="abrirModalTransferir()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Transferir</button>`;
+        html += `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar</button>`;
+      }
+      actionsEl.innerHTML = html;
     }
 
     async function carregarMensagens(idAtendimento, isSilent) {
@@ -232,9 +344,9 @@
 
             return `
               <div class="flex ${isCliente ? 'justify-start' : 'justify-end'}">
-                <div class="max-w-[75%] rounded-2xl p-3.5 text-xs ${isCliente ? 'bg-slate-800 text-slate-200 rounded-tl-none' : 'bg-indigo-600 text-white rounded-tr-none'} shadow-md space-y-1">
-                  <p class="font-semibold text-[10px] opacity-75">${m.nomeRemetente}</p>
-                  <p class="leading-relaxed">${m.conteudo}</p>
+                <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl p-3.5 text-xs ${isCliente ? 'bg-slate-800 text-slate-200 rounded-tl-none' : 'bg-indigo-600 text-white rounded-tr-none'} shadow-md space-y-1">
+                  <p class="font-semibold text-[10px] text-indigo-300 opacity-90">${m.nomeRemetente}</p>
+                  <p class="leading-relaxed whitespace-pre-wrap">${m.conteudo}</p>
                   ${midiaHtml}
                 </div>
               </div>
@@ -266,6 +378,29 @@
       } catch (err) { console.error("Erro:", err); }
     }
 
+    function abrirModalTransferir() {
+      document.getElementById('transfer-modal').classList.remove('hidden');
+    }
+    function fecharModalTransferir() {
+      document.getElementById('transfer-modal').classList.add('hidden');
+    }
+
+    async function confirmarTransferencia() {
+      if (!chatSelecionado) return;
+      const novoAtendente = document.getElementById('transfer-select').value;
+      fecharModalTransferir();
+
+      try {
+        await fetch(APPS_SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'transferirAtendimento', idAtendimento: chatSelecionado.idAtendimento, novoAtendente: novoAtendente })
+        });
+        voltarMobile();
+        await carregarChats();
+      } catch (err) { alert("Erro ao transferir atendimento."); }
+    }
+
     async function finalizarChat(idAtendimento) {
       if (!chatSelecionado) return;
       chatSelecionado.status = 'Finalizado';
@@ -279,6 +414,7 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'finalizarAtendimento', idAtendimento: idAtendimento })
         });
+        voltarMobile();
         await carregarChats();
       } catch (err) { console.error("Erro:", err); }
     }
