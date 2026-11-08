@@ -57,6 +57,10 @@
         <span class="text-[10px] text-slate-400 block uppercase font-semibold">Tempo Média Fila</span>
         <span id="kpi-tme" class="text-xs font-bold text-emerald-400">0 min</span>
       </div>
+      <div class="bg-slate-900 px-3 py-1 rounded-xl border border-slate-800 text-center" title="Atendentes ativos no sistema">
+        <span class="text-[10px] text-slate-400 block uppercase font-semibold">Atendentes On</span>
+        <span id="kpi-atendentes" class="text-xs font-bold text-sky-400">1</span>
+      </div>
     </div>
 
     <!-- SINO E PERFIL -->
@@ -76,7 +80,7 @@
   <!-- PAINEL PRINCIPAL -->
   <div id="app-container" class="flex-1 flex overflow-hidden relative">
     
-    <!-- BARRA LATERAL (LISTA DE CHATS COM NOTIFICAÇÕES POR ABA) -->
+    <!-- BARRA LATERAL -->
     <aside id="sidebar" class="w-full md:w-80 lg:w-96 bg-slate-950/60 border-r border-slate-800 flex flex-col shrink-0 h-full">
       <div class="p-3 border-b border-slate-800 grid grid-cols-3 gap-1 bg-slate-950 shrink-0">
         <button onclick="setFila('filaGeral')" id="tab-filaGeral" class="py-2 text-xs font-semibold rounded-lg bg-indigo-600 text-white transition flex items-center justify-center space-x-1">
@@ -125,7 +129,7 @@
         </div>
       </div>
 
-      <!-- INPUT DE RESPOSTA (FIXADO NA PARTE INFERIOR) -->
+      <!-- INPUT DE RESPOSTA -->
       <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 shrink-0 hidden">
         <div class="flex items-center space-x-2">
           <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
@@ -150,7 +154,7 @@
         <option value="Fila Geral">Fila Geral (Devolver)</option>
         <option value="solutionsproativa@gmail.com">solutionsproativa@gmail.com</option>
         <option value="edilsonfpcavalcanti@gmail.com">edilsonfpcavalcanti@gmail.com</option>
-        <option value="ednaldofcavalcanti@gmail.com">ednaldofcalvalcanti@gmail.com</option>
+        <option value="ednaldofcavalcanti@gmail.com">ednaldofcavalcanti@gmail.com</option>
       </select>
       <div class="flex justify-end space-x-2 pt-2">
         <button onclick="fecharModalTransferir()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
@@ -167,6 +171,7 @@
     let abaAtual = 'filaGeral';
     let todosChats = [];
     let chatSelecionado = null;
+    let timerPolling = null;
 
     function parseJwt(token) {
       const base64Url = token.split('.')[1];
@@ -182,16 +187,28 @@
         document.getElementById('login-container').classList.add('hidden');
         carregarChats();
         
-        setInterval(() => {
-          carregarChats();
-          if (chatSelecionado) carregarMensagens(chatSelecionado.idAtendimento, true);
-        }, 4000);
+        // Polling otimizado: 6 segundos para economizar cotas
+        iniciarPollingOtimizado();
       } else {
         const err = document.getElementById('login-error');
         err.innerText = "Acesso negado: O e-mail " + payload.email + " não é autorizado.";
         err.classList.remove('hidden');
       }
     }
+
+    function iniciarPollingOtimizado() {
+      if (timerPolling) clearInterval(timerPolling);
+      
+      const intervalo = document.hidden ? 15000 : 6000;
+      timerPolling = setInterval(() => {
+        carregarChats();
+        if (chatSelecionado) carregarMensagens(chatSelecionado.idAtendimento, true);
+      }, intervalo);
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      iniciarPollingOtimizado();
+    });
 
     function logout() { location.reload(); }
 
@@ -220,6 +237,29 @@
       } catch (e) { console.error("Erro ao carregar chats:", e); }
     }
 
+    function calcularTempoMedioFila(chamadosFila) {
+      if (!chamadosFila || chamadosFila.length === 0) return "0 min";
+      
+      const agora = new Date().getTime();
+      let somaMinutos = 0;
+      let contagemValida = 0;
+
+      chamadosFila.forEach(c => {
+        if (c.dataCriacao) {
+          const dataCriac = new Date(c.dataCriacao).getTime();
+          if (!isNaN(dataCriac)) {
+            const diffMin = Math.max(0, Math.floor((agora - dataCriac) / 60000));
+            somaMinutos += diffMin;
+            contagemValida++;
+          }
+        }
+      });
+
+      if (contagemValida === 0) return "0 min";
+      const media = Math.round(somaMinutos / contagemValida);
+      return media + " min";
+    }
+
     function atualizarKPIs() {
       const naFila = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado');
       const meus = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado');
@@ -229,8 +269,9 @@
 
       document.getElementById('kpi-fila').innerText = naFila.length;
       document.getElementById('kpi-meus').innerText = meus.length;
+      document.getElementById('kpi-tme').innerText = calcularTempoMedioFila(naFila);
 
-      // Atualiza os balões de notificação nas abas laterais
+      // Atualiza os balões de notificação nas abas
       const badgeFila = document.getElementById('badge-tab-filaGeral');
       if (somaFila > 0) {
         badgeFila.innerText = somaFila;
