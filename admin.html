@@ -129,13 +129,39 @@
         </div>
       </div>
 
-      <!-- INPUT DE RESPOSTA -->
+      <!-- INPUT DE RESPOSTA E GRAVADOR DE ÁUDIO -->
       <div id="chat-input-box" class="p-3 border-t border-slate-800 bg-slate-950 shrink-0 hidden">
-        <div class="flex items-center space-x-2">
+        
+        <!-- BARRA DE GRAVAÇÃO DE ÁUDIO (EXIBIDA QUANDO GRAVANDO) -->
+        <div id="recording-bar" class="hidden flex items-center justify-between bg-slate-900 border border-rose-500/50 rounded-xl px-4 py-2.5">
+          <div class="flex items-center space-x-3">
+            <span class="w-3 h-3 rounded-full bg-rose-500 animate-ping"></span>
+            <span class="text-xs font-semibold text-rose-400">Gravando áudio...</span>
+            <span id="recording-timer" class="text-xs font-mono font-bold text-slate-200">00:00</span>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="cancelarGravacaoAudio()" title="Cancelar gravação" class="bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white p-2 rounded-lg text-xs font-bold transition">
+              <i class="fa-solid fa-trash text-rose-400"></i>
+            </button>
+            <button onclick="pararEEnviarAudio()" title="Enviar áudio" class="bg-emerald-600 hover:bg-emerald-500 text-white p-2.5 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+              <i class="fa-solid fa-paper-plane"></i>
+              <span>Enviar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- BARRA DE DIGITAÇÃO E ANEXOS (PADRÃO) -->
+        <div id="input-controls" class="flex items-center space-x-2">
           <input type="file" id="file-input" class="hidden" onchange="enviarAnexo(this)">
           <button onclick="document.getElementById('file-input').click()" title="Anexar arquivo/imagem/vídeo/PDF" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition">
             <i class="fa-solid fa-paperclip text-sm"></i>
           </button>
+
+          <!-- BOTAO DE GRAVAR AUDIO NATIVO -->
+          <button id="btn-mic" onclick="iniciarGravacaoAudio()" title="Gravar mensagem de voz" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-xl transition hover:text-rose-400">
+            <i class="fa-solid fa-microphone text-sm"></i>
+          </button>
+
           <textarea id="message-input" rows="1" placeholder="Digite sua resposta..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
           <button id="btn-send-msg" onclick="enviarMensagem()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-3 rounded-xl transition flex items-center justify-center">
             <i class="fa-solid fa-paper-plane text-sm"></i>
@@ -172,6 +198,12 @@
     let todosChats = [];
     let chatSelecionado = null;
     let timerPolling = null;
+
+    // VARIÁVEIS DO GRAVADOR DE ÁUDIO NATIVO
+    let mediaRecorder = null;
+    let audioChunks = [];
+    let timerInterval = null;
+    let secondsRecorded = 0;
 
     function formatarHora(dataISO) {
       if (!dataISO) return '';
@@ -438,6 +470,7 @@
       actionsEl.innerHTML = html;
     }
 
+    // RENDERIZADOR INTELIGENTE DE MÍDIAS (ÁUDIO / FOTOS / VÍDEOS / PDF)
     async function carregarMensagens(idAtendimento, isSilent) {
       const msgsEl = document.getElementById('chat-messages');
       try {
@@ -449,16 +482,34 @@
             const horaMsg = formatarHora(m.dataHora);
             let midiaHtml = "";
 
-            if (m.midiaUrl) {
-              const url = String(m.midiaUrl);
-              if (url.match(/\.(jpeg|jpg|gif|png|webp)/i) || url.includes('image')) {
-                midiaHtml = `<img src="${url}" class="max-w-xs rounded-xl mt-2 border border-slate-700">`;
-              } else if (url.match(/\.(mp3|ogg|wav|m4a)/i) || url.includes('audio')) {
-                midiaHtml = `<audio controls src="${url}" class="mt-2 w-full max-w-xs"></audio>`;
-              } else if (url.match(/\.(mp4|webm)/i) || url.includes('video')) {
-                midiaHtml = `<video controls src="${url}" class="mt-2 w-full max-w-xs rounded-xl border border-slate-700"></video>`;
+            const conteudo = String(m.conteudo || '').toLowerCase();
+            const url = String(m.midiaUrl || '');
+
+            if (url) {
+              if (conteudo.includes('áudio') || conteudo.includes('audio') || url.includes('.mp3') || url.includes('.ogg')) {
+                midiaHtml = `
+                  <div class="mt-2 bg-slate-900/90 p-2.5 rounded-xl border border-slate-700/60 max-w-xs">
+                    <audio controls src="${url}" class="w-full h-9 rounded-lg focus:outline-none"></audio>
+                  </div>`;
+              } else if (conteudo.includes('imagem') || conteudo.includes('foto') || url.match(/\.(jpeg|jpg|png|webp|gif)/i) || url.includes('image')) {
+                midiaHtml = `
+                  <a href="${url}" target="_blank" class="block mt-2">
+                    <img src="${url}" class="max-w-xs max-h-60 rounded-xl border border-slate-700 object-cover hover:opacity-90 transition">
+                  </a>`;
+              } else if (conteudo.includes('vídeo') || conteudo.includes('video') || url.match(/\.(mp4|webm)/i)) {
+                midiaHtml = `
+                  <div class="mt-2 max-w-xs">
+                    <video controls src="${url}" class="w-full max-h-60 rounded-xl border border-slate-700"></video>
+                  </div>`;
               } else {
-                midiaHtml = `<a href="${url}" target="_blank" class="inline-flex items-center space-x-2 bg-slate-900 hover:bg-slate-950 text-indigo-300 px-3 py-2 rounded-lg text-xs font-medium mt-2 border border-slate-800"><i class="fa-solid fa-file-pdf text-rose-400 text-sm"></i><span>Abrir Arquivo / PDF</span></a>`;
+                midiaHtml = `
+                  <a href="${url}" target="_blank" class="inline-flex items-center space-x-3 bg-slate-900 hover:bg-slate-950 text-indigo-300 px-3.5 py-2.5 rounded-xl text-xs font-semibold mt-2 border border-slate-800 transition">
+                    <i class="fa-solid fa-file-pdf text-rose-400 text-lg"></i>
+                    <div class="flex flex-col text-left">
+                      <span class="text-slate-200 truncate max-w-[170px]">Abrir Documento / PDF</span>
+                      <span class="text-[10px] text-slate-400">Clique para visualizar</span>
+                    </div>
+                  </a>`;
               }
             }
 
@@ -482,6 +533,92 @@
           }
         }
       } catch (e) { console.error("Erro ao carregar mensagens:", e); }
+    }
+
+    // LÓGICA DO GRAVADOR DE ÁUDIO NATIVO (WHATSAPP VOICE NOTE)
+    async function iniciarGravacaoAudio() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("O seu navegador não suporta gravação de áudio pelo microfone.");
+        return;
+      }
+
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioChunks = [];
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data.size > 0) audioChunks.push(event.data);
+        };
+
+        mediaRecorder.start();
+        secondsRecorded = 0;
+        document.getElementById('recording-timer').innerText = "00:00";
+        document.getElementById('input-controls').classList.add('hidden');
+        document.getElementById('recording-bar').classList.remove('hidden');
+
+        timerInterval = setInterval(() => {
+          secondsRecorded++;
+          const mins = String(Math.floor(secondsRecorded / 60)).padStart(2, '0');
+          const secs = String(secondsRecorded % 60).padStart(2, '0');
+          document.getElementById('recording-timer').innerText = `${mins}:${secs}`;
+        }, 1000);
+
+      } catch (err) {
+        alert("Permissão do microfone negada. Permita o acesso ao microfone no navegador.");
+      }
+    }
+
+    function cancelarGravacaoAudio() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop();
+        mediaRecorder.stream.getTracks().forEach(track => track.stop());
+      }
+      clearInterval(timerInterval);
+      audioChunks = [];
+      document.getElementById('recording-bar').classList.add('hidden');
+      document.getElementById('input-controls').classList.remove('hidden');
+    }
+
+    async function pararEEnviarAudio() {
+      if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+
+      mediaRecorder.onstop = async () => {
+        clearInterval(timerInterval);
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+        const reader = new FileReader();
+
+        reader.onload = async (e) => {
+          const base64 = e.target.result.split(',')[1];
+          document.getElementById('recording-bar').classList.add('hidden');
+          document.getElementById('input-controls').classList.remove('hidden');
+
+          try {
+            await fetch(APPS_SCRIPT_URL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({
+                action: 'enviarResposta',
+                idAtendimento: chatSelecionado.idAtendimento,
+                textoResposta: '🎵 [Áudio enviado]',
+                nomeAtendente: usuarioLogado,
+                midiaBase64: base64,
+                tipoMidia: 'audio',
+                nomeArquivo: 'audio_voz.mp3'
+              })
+            });
+            await carregarMensagens(chatSelecionado.idAtendimento, false);
+            await carregarChats();
+          } catch (err) {
+            alert("Erro ao enviar mensagem de áudio.");
+          }
+        };
+
+        reader.readAsDataURL(audioBlob);
+      };
+
+      mediaRecorder.stop();
+      mediaRecorder.stream.getTracks().forEach(track => track.stop());
     }
 
     async function assumirChat(idAtendimento) {
