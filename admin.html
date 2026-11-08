@@ -100,7 +100,7 @@
       <div class="p-2.5 border-b border-slate-800 bg-slate-950/70 shrink-0">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-          <input type="text" id="search-input" oninput="renderizarListaChats()" placeholder="Pesquisar por nome, número ou mensagem..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+          <input type="text" id="search-input" oninput="renderizarListaChats()" placeholder="Pesquisar por nome, protocolo ou mensagem..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
         </div>
       </div>
 
@@ -189,7 +189,7 @@
         <option value="Fila Geral">Fila Geral (Devolver)</option>
         <option value="solutionsproativa@gmail.com">solutionsproativa@gmail.com</option>
         <option value="edilsonfpcavalcanti@gmail.com">edilsonfpcavalcanti@gmail.com</option>
-        <option value="andreza.jp.pb@gmail.com">andreza.jp.pb@gmail.com</option>
+        <option value="ednaldofcavalcanti@gmail.com">ednaldofcavalcanti@gmail.com</option>
       </select>
       <div class="flex justify-end space-x-2 pt-2">
         <button onclick="fecharModalTransferir()" class="px-4 py-2 bg-slate-800 text-slate-300 rounded-xl text-xs font-semibold">Cancelar</button>
@@ -200,13 +200,14 @@
 
   <script>
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycby1BNA4pXax4OmVLZLH51pi58lEZoh2wHCKTVvlopFYYp6MhznnfHSwZLTWWTz8yLN4/exec";
-    const EMAILS_AUTORIZADOS = ["solutionsproativa@gmail.com", "edilsonfpcavalcanti@gmail.com", "andreza.jp.pb@gmail.com"];
+    const EMAILS_AUTORIZADOS = ["solutionsproativa@gmail.com", "edilsonfpcavalcanti@gmail.com", "ednaldofcavalcanti@gmail.com"];
 
     let usuarioLogado = null;
     let abaAtual = 'filaGeral';
     let todosChats = [];
     let chatSelecionado = null;
     let timerPolling = null;
+    let clientesExpandidos = new Set();
 
     // VARIÁVEIS DO GRAVADOR DE ÁUDIO NATIVO
     let mediaRecorder = null;
@@ -372,6 +373,16 @@
       }
     }
 
+    function toggleClienteHistorico(chave, event) {
+      if (event) event.stopPropagation();
+      if (clientesExpandidos.has(chave)) {
+        clientesExpandidos.delete(chave);
+      } else {
+        clientesExpandidos.add(chave);
+      }
+      renderizarListaChats();
+    }
+
     function renderizarListaChats() {
       const listEl = document.getElementById('chat-list');
       const termoBusca = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
@@ -385,11 +396,12 @@
         filtrados = todosChats.filter(c => String(c.status).trim() === 'Finalizado');
       }
 
-      // FILTRO DE PESQUISA EM TEMPO REAL
+      // FILTRO DE PESQUISA EM TEMPO REAL (Nome, número, ID de chamado e mensagens)
       if (termoBusca) {
         filtrados = filtrados.filter(c => 
           String(c.nomeCliente || '').toLowerCase().includes(termoBusca) ||
           String(c.telefone || '').toLowerCase().includes(termoBusca) ||
+          String(c.idAtendimento || '').toLowerCase().includes(termoBusca) ||
           String(c.ultimaMensagem || '').toLowerCase().includes(termoBusca)
         );
       }
@@ -399,23 +411,28 @@
         return;
       }
 
-      // RENDERIZAÇÃO DA ABA HISTÓRICO AGRUPADA POR CLIENTE
+      // RENDERIZAÇÃO DA ABA HISTÓRICO AGRUPADA POR CLIENTE COM SANFONA (ACCORDION)
       if (abaAtual === 'historico') {
         const gruposClientes = {};
         filtrados.forEach(c => {
           const chave = String(c.telefone || c.nomeCliente).trim();
           if (!gruposClientes[chave]) {
             gruposClientes[chave] = {
+              chave: chave,
               cliente: c.nomeCliente,
               telefone: c.telefone,
               fotoPerfil: c.fotoPerfil,
               canal: c.canal,
-              chamados: [],
-              ultimaData: c.dataAtualizacao || c.dataCriacao,
-              ultimaMensagem: c.ultimaMensagem
+              chamados: []
             };
           }
           gruposClientes[chave].chamados.push(c);
+        });
+
+        Object.values(gruposClientes).forEach(g => {
+          g.chamados.sort((a, b) => new Date(b.dataAtualizacao || b.dataCriacao) - new Date(a.dataAtualizacao || a.dataCriacao));
+          g.ultimaData = g.chamados[0].dataAtualizacao || g.chamados[0].dataCriacao;
+          g.ultimaMensagem = g.chamados[0].ultimaMensagem;
         });
 
         const listaAgrupada = Object.values(gruposClientes);
@@ -427,9 +444,7 @@
           const totalAtendimentos = g.chamados.length;
           const iniciais = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
           const horaStr = formatarDataLista(g.ultimaData);
-
-          const idsConcat = g.chamados.map(ch => ch.idAtendimento).join(',');
-          const isSelected = chatSelecionado && g.chamados.some(ch => ch.idAtendimento === chatSelecionado.idAtendimento);
+          const isExpanded = clientesExpandidos.has(g.chave);
 
           let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${iniciais}</div>`;
           if (g.fotoPerfil && String(g.fotoPerfil).startsWith('http')) {
@@ -440,21 +455,48 @@
               </div>`;
           }
 
-          return `
-            <div onclick="abrirHistoricoCliente('${idsConcat}', '${g.chamados[0].idAtendimento}')" class="p-3.5 hover:bg-slate-900/80 cursor-pointer transition flex items-center space-x-3 ${isSelected ? 'bg-slate-900 border-l-4 border-indigo-500' : ''}">
-              ${avatarHtml}
-              <div class="flex-1 min-w-0">
-                <div class="flex justify-between items-center">
-                  <span class="font-semibold text-slate-200 text-xs truncate max-w-[130px]">${nomeStr}</span>
-                  <span class="text-[10px] text-slate-400 font-medium">${horaStr}</span>
-                </div>
-                <div class="flex justify-between items-center mt-1">
-                  <p class="text-[11px] text-slate-400 truncate pr-2">${g.ultimaMensagem || 'Histórico finalizado'}</p>
-                  <div class="flex items-center space-x-1 shrink-0">
-                    <span class="text-[9px] bg-slate-800 text-indigo-300 px-1.5 py-0.5 rounded-full font-bold border border-slate-700/60" title="${totalAtendimentos} atendimento(s) finalizado(s)">${totalAtendimentos} ${totalAtendimentos > 1 ? 'atends' : 'atend'}</span>
+          const subChamadosHtml = g.chamados.map(c => {
+            const isSelected = chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento;
+            const dataChamado = formatarDataLista(c.dataAtualizacao || c.dataCriacao);
+            const horaChamado = formatarHora(c.dataAtualizacao || c.dataCriacao);
+            return `
+              <div onclick="abrirChat('${c.idAtendimento}')" class="pl-12 pr-3 py-2.5 hover:bg-slate-800/80 cursor-pointer border-l-4 ${isSelected ? 'border-indigo-500 bg-slate-900' : 'border-slate-800 bg-slate-950/40'} flex justify-between items-center text-xs transition">
+                <div class="min-w-0 flex-1 pr-2">
+                  <div class="flex items-center space-x-2">
+                    <span class="font-semibold text-slate-200 text-[11px] truncate">${c.idAtendimento}</span>
+                    <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.2 rounded font-mono">${horaChamado}</span>
                   </div>
+                  <p class="text-[10px] text-slate-400 truncate mt-0.5">${c.ultimaMensagem || 'Sem mensagens'}</p>
+                </div>
+                <div class="text-right shrink-0">
+                  <span class="text-[10px] text-slate-400 block font-medium">${dataChamado}</span>
+                  <span class="text-[9px] text-indigo-400 font-semibold truncate max-w-[80px] block">${c.atendente}</span>
                 </div>
               </div>
+            `;
+          }).join('');
+
+          return `
+            <div class="border-b border-slate-800/60">
+              <div onclick="toggleClienteHistorico('${g.chave}', event)" class="p-3.5 hover:bg-slate-900/80 cursor-pointer transition flex items-center justify-between space-x-3 bg-slate-950/30">
+                <div class="flex items-center space-x-3 min-w-0 flex-1">
+                  ${avatarHtml}
+                  <div class="flex-1 min-w-0">
+                    <div class="flex justify-between items-center">
+                      <span class="font-semibold text-slate-200 text-xs truncate max-w-[130px]">${nomeStr}</span>
+                      <span class="text-[10px] text-slate-400 font-medium">${horaStr}</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                      <p class="text-[11px] text-slate-400 truncate pr-2">${g.ultimaMensagem || 'Histórico finalizado'}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                  <span class="text-[9px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-bold border border-indigo-500/30">${totalAtendimentos} ${totalAtendimentos > 1 ? 'atends' : 'atend'}</span>
+                  <i class="fa-solid ${isExpanded ? 'fa-chevron-up' : 'fa-chevron-down'} text-slate-500 text-xs transition-transform duration-200"></i>
+                </div>
+              </div>
+              ${isExpanded ? `<div class="divide-y divide-slate-800/40 bg-slate-950/70">${subChamadosHtml}</div>` : ''}
             </div>
           `;
         }).join('');
@@ -511,10 +553,16 @@
 
       renderizarListaChats();
       document.getElementById('chat-header').classList.remove('hidden');
-      document.getElementById('chat-input-box').classList.remove('hidden');
       
+      const isFinalizado = String(chatSelecionado.status).trim() === 'Finalizado';
+      if (isFinalizado) {
+        document.getElementById('chat-input-box').classList.add('hidden');
+      } else {
+        document.getElementById('chat-input-box').classList.remove('hidden');
+      }
+
       const nomeStr = String(chatSelecionado.nomeCliente || 'Cliente');
-      document.getElementById('chat-client-name').innerText = nomeStr;
+      document.getElementById('chat-client-name').innerText = nomeStr + (isFinalizado ? ` • ${chatSelecionado.idAtendimento}` : '');
       document.getElementById('chat-client-phone').innerText = (chatSelecionado.telefone || '') + " • " + (chatSelecionado.canal || 'WhatsApp');
 
       const imgEl = document.getElementById('chat-avatar-img');
@@ -533,44 +581,6 @@
       carregarMensagens(idAtendimento, false);
     }
 
-    async function abrirHistoricoCliente(idsConcat, idUltimoChamado) {
-      chatSelecionado = todosChats.find(c => c.idAtendimento === idUltimoChamado);
-      if (!chatSelecionado) return;
-
-      document.getElementById('sidebar').classList.add('hidden', 'md:flex');
-      document.getElementById('chat-main').classList.remove('hidden');
-      document.getElementById('chat-main').classList.add('flex');
-
-      renderizarListaChats();
-      document.getElementById('chat-header').classList.remove('hidden');
-      
-      const isFinalizado = String(chatSelecionado.status).trim() === 'Finalizado';
-      if (isFinalizado) {
-        document.getElementById('chat-input-box').classList.add('hidden');
-      } else {
-        document.getElementById('chat-input-box').classList.remove('hidden');
-      }
-      
-      const nomeStr = String(chatSelecionado.nomeCliente || 'Cliente');
-      document.getElementById('chat-client-name').innerText = nomeStr + " (Histórico)";
-      document.getElementById('chat-client-phone').innerText = (chatSelecionado.telefone || '') + " • " + (chatSelecionado.canal || 'WhatsApp');
-
-      const imgEl = document.getElementById('chat-avatar-img');
-      const initialsEl = document.getElementById('chat-avatar-initials');
-      if (chatSelecionado.fotoPerfil && String(chatSelecionado.fotoPerfil).startsWith('http')) {
-        imgEl.src = chatSelecionado.fotoPerfil;
-        imgEl.classList.remove('hidden');
-        initialsEl.classList.add('hidden');
-      } else {
-        imgEl.classList.add('hidden');
-        initialsEl.innerText = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
-        initialsEl.classList.remove('hidden');
-      }
-
-      atualizarBotoesAcao();
-      carregarMensagens(idsConcat, false);
-    }
-
     function voltarMobile() {
       document.getElementById('sidebar').classList.remove('hidden');
       document.getElementById('chat-main').classList.add('hidden');
@@ -587,7 +597,7 @@
         html += `<button onclick="abrirModalTransferir()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Transferir</button>`;
         html += `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar</button>`;
       } else {
-        html += `<span class="bg-slate-800 text-slate-400 text-xs font-semibold px-3 py-1.5 rounded-lg">Chamado Finalizado</span>`;
+        html += `<span class="bg-slate-800 text-slate-400 text-xs font-semibold px-3 py-1.5 rounded-lg border border-slate-700/60">Chamado Finalizado</span>`;
       }
       actionsEl.innerHTML = html;
     }
