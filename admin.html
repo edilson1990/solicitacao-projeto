@@ -14,7 +14,9 @@
   <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950 p-4">
     <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl text-center space-y-6">
       <div class="flex justify-center">
-        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-14 object-contain">
+        <div class="bg-white/95 px-4 py-2 rounded-xl shadow-md">
+          <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-12 object-contain">
+        </div>
       </div>
       <div>
         <h1 class="text-xl font-bold text-white">Central Omnichannel Proativa</h1>
@@ -32,11 +34,12 @@
     </div>
   </div>
 
-  <!-- CABEÇALHO COM INDICADORES (KPIS) E LOGO CORRIGIDO -->
+  <!-- CABEÇALHO COM LOGO DE ALTO CONTRASTE E INDICADORES (KPIS) -->
   <header class="bg-slate-950 border-b border-slate-800 px-4 py-2.5 flex justify-between items-center shrink-0">
     <div class="flex items-center space-x-3">
-      <div class="bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 flex items-center">
-        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa" class="h-7 w-auto object-contain">
+      <!-- CARD CLARO PARA DESTACAR O NOME PROATIVA SOLUTIONS -->
+      <div class="bg-white/95 px-3 py-1 rounded-lg flex items-center shadow-sm">
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-6 w-auto object-contain">
       </div>
       <span class="text-xs font-bold text-slate-300 border-l border-slate-800 pl-3 hidden sm:inline">Central Omnichannel</span>
     </div>
@@ -59,9 +62,9 @@
 
     <!-- SINO DE NOTIFICAÇÃO E PERFIL -->
     <div class="flex items-center space-x-3">
-      <div class="relative cursor-pointer p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition" title="Notificações Pendentes">
+      <div class="relative cursor-pointer p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 transition" title="Mensagens pendentes de resposta">
         <i class="fa-solid fa-bell text-slate-300 text-sm"></i>
-        <span id="notif-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-slate-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+        <span id="notif-badge" class="absolute -top-1 -right-1 bg-emerald-500 text-slate-950 font-bold text-[10px] min-w-[18px] h-4 px-1 rounded-full flex items-center justify-center hidden">0</span>
       </div>
       <div class="flex items-center space-x-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -202,7 +205,7 @@
         const res = await fetch(`${APPS_SCRIPT_URL}?action=getChats`);
         const data = await res.json();
         if (data.status === "sucesso") {
-          todosChats = data.chats;
+          todosChats = data.chats || [];
           atualizarKPIs();
           renderizarListaChats();
         }
@@ -210,9 +213,13 @@
     }
 
     function atualizarKPIs() {
-      const naFila = todosChats.filter(c => c.atendente === 'Fila Geral' && c.status !== 'Finalizado').length;
-      const meus = todosChats.filter(c => c.atendente === usuarioLogado && c.status !== 'Finalizado').length;
-      const totalNaoLidas = todosChats.reduce((acc, c) => acc + (c.naoLidas || 0), 0);
+      const naFila = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado').length;
+      const meus = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado').length;
+      
+      // Soma apenas mensagens pendentes de chamados ativos
+      const totalNaoLidas = todosChats.reduce((acc, c) => {
+        return (String(c.status).trim() !== 'Finalizado') ? acc + (Number(c.naoLidas) || 0) : acc;
+      }, 0);
 
       document.getElementById('kpi-fila').innerText = naFila;
       document.getElementById('kpi-meus').innerText = meus;
@@ -231,11 +238,11 @@
       let filtrados = [];
 
       if (abaAtual === 'filaGeral') {
-        filtrados = todosChats.filter(c => c.atendente === 'Fila Geral' && c.status !== 'Finalizado');
+        filtrados = todosChats.filter(c => String(c.atendente).trim() === 'Fila Geral' && String(c.status).trim() !== 'Finalizado');
       } else if (abaAtual === 'meus') {
-        filtrados = todosChats.filter(c => c.atendente === usuarioLogado && c.status !== 'Finalizado');
+        filtrados = todosChats.filter(c => String(c.atendente).trim() === usuarioLogado && String(c.status).trim() !== 'Finalizado');
       } else {
-        filtrados = todosChats.filter(c => c.status === 'Finalizado');
+        filtrados = todosChats.filter(c => String(c.status).trim() === 'Finalizado');
       }
 
       if (filtrados.length === 0) {
@@ -244,12 +251,15 @@
       }
 
       listEl.innerHTML = filtrados.map(c => {
-        const isGroup = c.canal.includes('Grupo');
+        const nomeStr = String(c.nomeCliente || 'Cliente').trim();
+        const canalStr = String(c.canal || 'WhatsApp').trim();
+        const isGroup = canalStr.includes('Grupo');
         const badgeNaoLidas = c.naoLidas > 0 ? `<span class="bg-emerald-500 text-slate-950 font-bold text-[10px] px-1.5 py-0.5 rounded-full">${c.naoLidas}</span>` : '';
         const isSelected = chatSelecionado && chatSelecionado.idAtendimento === c.idAtendimento;
+        const iniciais = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
 
-        let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${c.nomeCliente.substring(0, 2).toUpperCase()}</div>`;
-        if (c.fotoPerfil) {
+        let avatarHtml = `<div class="w-9 h-9 rounded-full ${isGroup ? 'bg-amber-600/30 text-amber-300 border-amber-500/40' : 'bg-indigo-600/30 text-indigo-300 border-indigo-500/40'} border flex items-center justify-center font-bold text-xs shrink-0">${iniciais}</div>`;
+        if (c.fotoPerfil && String(c.fotoPerfil).startsWith('http')) {
           avatarHtml = `<img src="${c.fotoPerfil}" class="w-9 h-9 rounded-full object-cover shrink-0 border border-slate-700">`;
         }
 
@@ -258,8 +268,8 @@
             ${avatarHtml}
             <div class="flex-1 min-w-0">
               <div class="flex justify-between items-center">
-                <span class="font-semibold text-slate-200 text-xs truncate max-w-[140px]">${c.nomeCliente}</span>
-                <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${isGroup ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${c.canal}</span>
+                <span class="font-semibold text-slate-200 text-xs truncate max-w-[140px]">${nomeStr}</span>
+                <span class="text-[9px] px-1.5 py-0.5 rounded-full font-bold ${isGroup ? 'bg-amber-500/20 text-amber-400' : 'bg-emerald-500/20 text-emerald-400'}">${canalStr}</span>
               </div>
               <div class="flex justify-between items-center mt-1">
                 <p class="text-[11px] text-slate-400 truncate pr-2">${c.ultimaMensagem || 'Sem mensagens'}</p>
@@ -275,7 +285,6 @@
       chatSelecionado = todosChats.find(c => c.idAtendimento === idAtendimento);
       if (!chatSelecionado) return;
 
-      // COMPORTAMENTO RESPONSIVO NO MOBILE
       document.getElementById('sidebar').classList.add('hidden', 'md:flex');
       document.getElementById('chat-main').classList.remove('hidden');
       document.getElementById('chat-main').classList.add('flex');
@@ -283,18 +292,20 @@
       renderizarListaChats();
       document.getElementById('chat-header').classList.remove('hidden');
       document.getElementById('chat-input-box').classList.remove('hidden');
-      document.getElementById('chat-client-name').innerText = chatSelecionado.nomeCliente;
-      document.getElementById('chat-client-phone').innerText = chatSelecionado.telefone + " • " + chatSelecionado.canal;
+      
+      const nomeStr = String(chatSelecionado.nomeCliente || 'Cliente');
+      document.getElementById('chat-client-name').innerText = nomeStr;
+      document.getElementById('chat-client-phone').innerText = (chatSelecionado.telefone || '') + " • " + (chatSelecionado.canal || 'WhatsApp');
 
       const imgEl = document.getElementById('chat-avatar-img');
       const initialsEl = document.getElementById('chat-avatar-initials');
-      if (chatSelecionado.fotoPerfil) {
+      if (chatSelecionado.fotoPerfil && String(chatSelecionado.fotoPerfil).startsWith('http')) {
         imgEl.src = chatSelecionado.fotoPerfil;
         imgEl.classList.remove('hidden');
         initialsEl.classList.add('hidden');
       } else {
         imgEl.classList.add('hidden');
-        initialsEl.innerText = chatSelecionado.nomeCliente.substring(0, 2).toUpperCase();
+        initialsEl.innerText = nomeStr.length >= 2 ? nomeStr.substring(0, 2).toUpperCase() : nomeStr.toUpperCase();
         initialsEl.classList.remove('hidden');
       }
 
@@ -312,9 +323,9 @@
       const actionsEl = document.getElementById('chat-actions');
 
       let html = '';
-      if (chatSelecionado.atendente === 'Fila Geral' && chatSelecionado.status !== 'Finalizado') {
+      if (String(chatSelecionado.atendente).trim() === 'Fila Geral' && String(chatSelecionado.status).trim() !== 'Finalizado') {
         html += `<button onclick="assumirChat('${chatSelecionado.idAtendimento}')" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Assumir Chamado</button>`;
-      } else if (chatSelecionado.status !== 'Finalizado') {
+      } else if (String(chatSelecionado.status).trim() !== 'Finalizado') {
         html += `<button onclick="abrirModalTransferir()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold px-3 py-1.5 rounded-lg transition"><i class="fa-solid fa-arrow-right-arrow-left mr-1"></i> Transferir</button>`;
         html += `<button onclick="finalizarChat('${chatSelecionado.idAtendimento}')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition">Finalizar</button>`;
       }
@@ -327,12 +338,12 @@
         const res = await fetch(`${APPS_SCRIPT_URL}?action=getMensagens&idAtendimento=${idAtendimento}`);
         const data = await res.json();
         if (data.status === "sucesso") {
-          const htmlMsg = data.mensagens.map(m => {
+          const htmlMsg = (data.mensagens || []).map(m => {
             const isCliente = m.remetenteTipo === 'Cliente';
             let midiaHtml = "";
 
             if (m.midiaUrl) {
-              const url = m.midiaUrl;
+              const url = String(m.midiaUrl);
               if (url.match(/\.(jpeg|jpg|gif|png|webp)/i) || url.includes('image')) {
                 midiaHtml = `<img src="${url}" class="max-w-xs rounded-lg mt-2 border border-slate-700">`;
               } else if (url.match(/\.(mp3|ogg|wav|m4a)/i) || url.includes('audio')) {
@@ -345,8 +356,8 @@
             return `
               <div class="flex ${isCliente ? 'justify-start' : 'justify-end'}">
                 <div class="max-w-[85%] sm:max-w-[75%] rounded-2xl p-3.5 text-xs ${isCliente ? 'bg-slate-800 text-slate-200 rounded-tl-none' : 'bg-indigo-600 text-white rounded-tr-none'} shadow-md space-y-1">
-                  <p class="font-semibold text-[10px] text-indigo-300 opacity-90">${m.nomeRemetente}</p>
-                  <p class="leading-relaxed whitespace-pre-wrap">${m.conteudo}</p>
+                  <p class="font-semibold text-[10px] text-indigo-300 opacity-90">${String(m.nomeRemetente || 'Contato')}</p>
+                  <p class="leading-relaxed whitespace-pre-wrap">${String(m.conteudo || '')}</p>
                   ${midiaHtml}
                 </div>
               </div>
