@@ -204,14 +204,27 @@
       const payload = parseJwt(response.credential);
       if (EMAILS_AUTORIZADOS.includes(payload.email)) {
         usuarioLogado = payload.email;
-        document.getElementById('user-email-display').innerText = usuarioLogado;
-        document.getElementById('login-container').classList.add('hidden');
-        carregarChats();
-        iniciarPollingOtimizado();
+        localStorage.setItem('proativa_user_email', usuarioLogado);
+        iniciarSessao();
       } else {
         const err = document.getElementById('login-error');
         err.innerText = "Acesso negado: O e-mail " + payload.email + " não é autorizado.";
         err.classList.remove('hidden');
+      }
+    }
+
+    function iniciarSessao() {
+      document.getElementById('user-email-display').innerText = usuarioLogado;
+      document.getElementById('login-container').classList.add('hidden');
+      carregarChats();
+      iniciarPollingOtimizado();
+    }
+
+    function verificarSessaoSalva() {
+      const emailSalvo = localStorage.getItem('proativa_user_email');
+      if (emailSalvo && EMAILS_AUTORIZADOS.includes(emailSalvo)) {
+        usuarioLogado = emailSalvo;
+        iniciarSessao();
       }
     }
 
@@ -228,7 +241,10 @@
       iniciarPollingOtimizado();
     });
 
-    function logout() { location.reload(); }
+    function logout() {
+      localStorage.removeItem('proativa_user_email');
+      location.reload();
+    }
 
     function setFila(fila) {
       abaAtual = fila;
@@ -603,6 +619,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      verificarSessaoSalva();
+
       const input = document.getElementById('message-input');
       if (input) {
         input.addEventListener('keydown', (e) => {
