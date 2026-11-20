@@ -187,27 +187,42 @@
       </div>
     </section>
 
-    <!-- GRÁFICOS ESTRATÉGICOS -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="lg:col-span-2 bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg">
-        <div class="flex justify-between items-center mb-4">
-          <div>
-            <h2 class="text-sm font-bold text-white">Evolução Mensal: Contratos Fechados vs. Caixa</h2>
-            <p class="text-xs text-slate-400">Comparativo histórico de vendas aprovadas e entradas efetivas</p>
-          </div>
+    <!-- GRÁFICOS ESTRATÉGICOS & SUGESTÃO DE COMPRA -->
+    <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <!-- Gráfico 1: Evolução Mensal (5 colunas) -->
+      <div class="lg:col-span-5 bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-white">Evolução Mensal: Fechado vs. Caixa</h2>
+          <p class="text-xs text-slate-400 mb-4">Vendas aprovadas e entradas efetivas por mês</p>
         </div>
-        <div class="h-64">
+        <div class="h-60">
           <canvas id="chart-evolucao"></canvas>
         </div>
       </div>
 
-      <div class="bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+      <!-- Gráfico 2: Top Equipamentos Próprios/Alocados (4 colunas) -->
+      <div class="lg:col-span-4 bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg flex flex-col justify-between">
         <div>
           <h2 class="text-sm font-bold text-white">Top Equipamentos Mais Alocados</h2>
-          <p class="text-xs text-slate-400 mb-3">Demanda de acervo nos contratos aprovados</p>
+          <p class="text-xs text-slate-400 mb-3">Maior giro nos contratos aprovados</p>
         </div>
-        <div class="h-56">
+        <div class="h-60">
           <canvas id="chart-equipamentos"></canvas>
+        </div>
+      </div>
+
+      <!-- Painel 3: TOP 10 SUBLOCADOS — SUGESTÃO DE COMPRA (3 colunas) -->
+      <div class="lg:col-span-3 bg-exec-card border border-rose-500/30 rounded-2xl p-5 shadow-lg flex flex-col">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-rose-500/15 text-rose-400 border border-rose-500/30 mb-1">
+              <i class="fa-solid fa-cart-shopping mr-1"></i> Sugestão de Compra
+            </span>
+            <h2 class="text-sm font-bold text-white leading-tight">Top 10 Mais Sublocados</h2>
+          </div>
+        </div>
+        <div id="lista-top-sublocados" class="flex-1 overflow-y-auto max-h-60 space-y-2 pr-1">
+          <p class="text-xs text-slate-500 text-center py-6">Carregando análise...</p>
         </div>
       </div>
     </section>
@@ -236,13 +251,25 @@
       <div id="painel-eventos" class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
-              <th class="py-3 px-4">Data Evento</th>
-              <th class="py-3 px-4">Evento / Local</th>
-              <th class="py-3 px-4">Cliente</th>
-              <th class="py-3 px-4">Status</th>
-              <th class="py-3 px-4 text-right">Valor Contrato</th>
-              <th class="py-3 px-4 text-right">Pago / Saldo</th>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400 select-none">
+              <th onclick="ordenarTabela('eventos', 'dataEvento')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Data Evento <i id="sort-eventos-dataEvento" class="fa-solid fa-sort-down text-exec-gold ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('eventos', 'nomeEvento')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Evento / Local <i id="sort-eventos-nomeEvento" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('eventos', 'nomeCliente')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Cliente <i id="sort-eventos-nomeCliente" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('eventos', 'status')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Status <i id="sort-eventos-status" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('eventos', 'valorTotal')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition">
+                Valor Contrato <i id="sort-eventos-valorTotal" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('eventos', 'valorPago')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition">
+                Pago / Saldo <i id="sort-eventos-valorPago" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
               <th class="py-3 px-4 text-right">Documentos</th>
             </tr>
           </thead>
@@ -254,12 +281,22 @@
       <div id="painel-pagamentos" class="hidden overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
-              <th class="py-3 px-4">Data Pagamento</th>
-              <th class="py-3 px-4">Cliente</th>
-              <th class="py-3 px-4">Evento / ID Orçamento</th>
-              <th class="py-3 px-4">Forma / Observação</th>
-              <th class="py-3 px-4 text-right">Valor Recebido</th>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400 select-none">
+              <th onclick="ordenarTabela('pagamentos', 'dataPagamento')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Data Pagamento <i id="sort-pagamentos-dataPagamento" class="fa-solid fa-sort-down text-exec-gold ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('pagamentos', 'nomeCliente')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Cliente <i id="sort-pagamentos-nomeCliente" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('pagamentos', 'nomeEvento')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Evento / ID Orçamento <i id="sort-pagamentos-nomeEvento" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('pagamentos', 'formaPagamento')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Forma / Observação <i id="sort-pagamentos-formaPagamento" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('pagamentos', 'valorRecebido')" class="py-3 px-4 text-right cursor-pointer hover:text-white transition">
+                Valor Recebido <i id="sort-pagamentos-valorRecebido" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
             </tr>
           </thead>
           <tbody id="tbody-pagamentos" class="divide-y divide-exec-border/60 text-xs"></tbody>
@@ -273,13 +310,25 @@
       <div id="painel-materiais" class="hidden overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
-              <th class="py-3 px-4">Equipamento / Material</th>
-              <th class="py-3 px-4">Categoria</th>
-              <th class="py-3 px-4 text-center">Qtd Própria Alocada</th>
-              <th class="py-3 px-4 text-center">Qtd Sublocada</th>
-              <th class="py-3 px-4 text-center">Total Movimentado</th>
-              <th class="py-3 px-4">Parceiros Acionados</th>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400 select-none">
+              <th onclick="ordenarTabela('materiais', 'nome')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Equipamento / Material <i id="sort-materiais-nome" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('materiais', 'categoria')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Categoria <i id="sort-materiais-categoria" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('materiais', 'qtdPropria')" class="py-3 px-4 text-center cursor-pointer hover:text-white transition">
+                Qtd Própria Alocada <i id="sort-materiais-qtdPropria" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('materiais', 'qtdSublocada')" class="py-3 px-4 text-center cursor-pointer hover:text-white transition">
+                Qtd Sublocada <i id="sort-materiais-qtdSublocada" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('materiais', 'totalMovimentado')" class="py-3 px-4 text-center cursor-pointer hover:text-white transition">
+                Total Movimentado <i id="sort-materiais-totalMovimentado" class="fa-solid fa-sort-down text-exec-gold ml-1"></i>
+              </th>
+              <th onclick="ordenarTabela('materiais', 'parceiros')" class="py-3 px-4 cursor-pointer hover:text-white transition">
+                Parceiros Acionados <i id="sort-materiais-parceiros" class="fa-solid fa-sort text-slate-600 ml-1"></i>
+              </th>
             </tr>
           </thead>
           <tbody id="tbody-materiais" class="divide-y divide-exec-border/60 text-xs"></tbody>
@@ -294,7 +343,6 @@
   </footer>
 
   <script>
-    // SUBSTITUA PELA URL DO SEU WEB APP APPS SCRIPT DA EXECUTIVA
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyPBYCyrHSEtgqKbnIh6UoWRq1jyDwdg0Og3aEd6hLneF1EBh8vnp2Hc9J-zHUBaUFJTg/exec";
     const EMAILS_AUTORIZADOS = ["edilsonfpcavalcanti@gmail.com", "solutionsproativa@gmail.com"];
 
@@ -302,6 +350,13 @@
     let baseDados = { orcamentos: [], recebimentos: [], clientes: [], materiais: [] };
     let chartEvolucao = null;
     let chartEquipamentos = null;
+
+    // Estado de ordenação por tabela
+    const ordenacaoEstado = {
+      eventos: { coluna: 'dataEvento', direcao: 'desc' },
+      pagamentos: { coluna: 'dataPagamento', direcao: 'desc' },
+      materiais: { coluna: 'totalMovimentado', direcao: 'desc' }
+    };
 
     function formatarMoeda(v) {
       return (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -366,9 +421,15 @@
 
         if (data.status === 'sucesso') {
           baseDados = data;
+          if (data.logoExecutiva) {
+            document.querySelectorAll('img[alt*="Executiva"]').forEach(img => {
+              img.src = data.logoExecutiva;
+            });
+          }
           popularFiltroPeriodos();
           aplicarFiltros();
           renderizarGraficos();
+          renderizarTopSublocados();
           statusEl.innerText = "Atualizado às " + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
         } else {
           statusEl.innerText = "Erro: " + (data.mensagem || "Acesso negado");
@@ -411,6 +472,66 @@
       }
     }
 
+    function ordenarTabela(tabela, coluna) {
+      const estado = ordenacaoEstado[tabela];
+      if (!estado) return;
+
+      if (estado.coluna === coluna) {
+        estado.direcao = estado.direcao === 'asc' ? 'desc' : 'asc';
+      } else {
+        estado.coluna = coluna;
+        const colunasNumericasOuData = ['dataEvento', 'valorTotal', 'valorPago', 'dataPagamento', 'valorRecebido', 'qtdPropria', 'qtdSublocada', 'totalMovimentado'];
+        estado.direcao = colunasNumericasOuData.includes(coluna) ? 'desc' : 'asc';
+      }
+
+      const mapaColunas = {
+        eventos: ['dataEvento', 'nomeEvento', 'nomeCliente', 'status', 'valorTotal', 'valorPago'],
+        pagamentos: ['dataPagamento', 'nomeCliente', 'nomeEvento', 'formaPagamento', 'valorRecebido'],
+        materiais: ['nome', 'categoria', 'qtdPropria', 'qtdSublocada', 'totalMovimentado', 'parceiros']
+      };
+
+      (mapaColunas[tabela] || []).forEach(col => {
+        const icon = document.getElementById(`sort-${tabela}-${col}`);
+        if (!icon) return;
+        if (col === estado.coluna) {
+          icon.className = estado.direcao === 'asc'
+            ? 'fa-solid fa-sort-up text-exec-gold ml-1'
+            : 'fa-solid fa-sort-down text-exec-gold ml-1';
+        } else {
+          icon.className = 'fa-solid fa-sort text-slate-600 ml-1';
+        }
+      });
+
+      aplicarFiltros();
+    }
+
+    function aplicarOrdenacaoLista(lista, tabela) {
+      const { coluna, direcao } = ordenacaoEstado[tabela];
+      const mult = direcao === 'asc' ? 1 : -1;
+
+      return [...lista].sort((a, b) => {
+        let valA = a[coluna];
+        let valB = b[coluna];
+
+        if (coluna === 'totalMovimentado') {
+          valA = (Number(a.qtdPropria) || 0) + (Number(a.qtdSublocada) || 0);
+          valB = (Number(b.qtdPropria) || 0) + (Number(b.qtdSublocada) || 0);
+        }
+
+        if (coluna === 'dataEvento' || coluna === 'dataPagamento') {
+          const tA = valA ? new Date(valA).getTime() : 0;
+          const tB = valB ? new Date(valB).getTime() : 0;
+          return (tA - tB) * mult;
+        }
+
+        if (typeof valA === 'number' || typeof valB === 'number') {
+          return ((Number(valA) || 0) - (Number(valB) || 0)) * mult;
+        }
+
+        return String(valA || '').localeCompare(String(valB || ''), 'pt-BR', { sensitivity: 'base' }) * mult;
+      });
+    }
+
     function aplicarFiltros() {
       const periodo = document.getElementById('filtro-periodo').value;
       const statusFiltro = document.getElementById('filtro-status').value;
@@ -448,10 +569,10 @@
       });
 
       atualizarKPIs(orcFiltrados, recFiltrados);
-      renderizarEventos(orcFiltrados);
-      renderizarPagamentos(recFiltrados);
+      renderizarEventos(aplicarOrdenacaoLista(orcFiltrados, 'eventos'));
+      renderizarPagamentos(aplicarOrdenacaoLista(recFiltrados, 'pagamentos'));
       renderizarClientes(busca);
-      renderizarMateriais(periodo, busca);
+      renderizarMateriais(busca);
     }
 
     function atualizarKPIs(orcs, recs) {
@@ -495,6 +616,47 @@
       document.getElementById('kpi-contratos-qtd').innerText = `${aprovados.length} fechados / ${orcs.length} orçados`;
       document.getElementById('kpi-autonomia').innerText = `${autonomia.replace('.', ',')}%`;
       document.getElementById('kpi-equip-qtd').innerText = `${totalEquip} equipamentos movimentados`;
+    }
+
+    function renderizarTopSublocados() {
+      const container = document.getElementById('lista-top-sublocados');
+      const sublocados = (baseDados.materiais || [])
+        .filter(m => Number(m.qtdSublocada) > 0)
+        .sort((a, b) => Number(b.qtdSublocada) - Number(a.qtdSublocada))
+        .slice(0, 10);
+
+      if (sublocados.length === 0) {
+        container.innerHTML = `
+          <div class="bg-exec-bg border border-exec-border rounded-xl p-4 text-center">
+            <i class="fa-solid fa-circle-check text-emerald-400 text-base mb-1"></i>
+            <p class="text-xs text-slate-300 font-semibold">100% de autonomia!</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Nenhum equipamento sublocado registrado.</p>
+          </div>`;
+        return;
+      }
+
+      const maxQtd = Number(sublocados[0].qtdSublocada) || 1;
+      container.innerHTML = sublocados.map((m, idx) => {
+        const pct = Math.max(12, Math.round((Number(m.qtdSublocada) / maxQtd) * 100));
+        return `
+          <div class="bg-exec-bg border border-exec-border rounded-xl p-2.5">
+            <div class="flex justify-between items-start gap-2">
+              <div class="min-w-0">
+                <span class="text-[11px] font-bold text-white uppercase block truncate" title="${m.nome}">
+                  <span class="text-rose-400 mr-1">${idx + 1}.</span>${m.nome}
+                </span>
+                <span class="text-[10px] text-slate-400 block truncate">${m.parceiros || 'Parceiro externo'}</span>
+              </div>
+              <span class="px-2 py-0.5 rounded-md bg-rose-500/15 text-rose-400 border border-rose-500/30 text-[10px] font-bold shrink-0">
+                ${m.qtdSublocada} un
+              </span>
+            </div>
+            <div class="w-full bg-slate-800 h-1.5 rounded-full mt-2 overflow-hidden">
+              <div class="bg-rose-500 h-1.5 rounded-full" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
 
     function renderizarEventos(lista) {
@@ -593,20 +755,22 @@
       `).join('');
     }
 
-    function renderizarMateriais(periodo, busca) {
+    function renderizarMateriais(busca) {
       const filtrados = baseDados.materiais.filter(m => {
         if (!busca) return true;
         return `${m.nome} ${m.categoria} ${m.parceiros}`.toLowerCase().includes(busca);
       });
-      document.getElementById('badge-materiais').innerText = filtrados.length;
+      const ordenados = aplicarOrdenacaoLista(filtrados, 'materiais');
+
+      document.getElementById('badge-materiais').innerText = ordenados.length;
       const tbody = document.getElementById('tbody-materiais');
 
-      if (filtrados.length === 0) {
+      if (ordenados.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500">Nenhum material movimentado.</td></tr>';
         return;
       }
 
-      tbody.innerHTML = filtrados.map(m => `
+      tbody.innerHTML = ordenados.map(m => `
         <tr class="hover:bg-black/40 transition">
           <td class="py-3 px-4 font-bold text-white uppercase">${m.nome}</td>
           <td class="py-3 px-4 text-slate-400">${m.categoria}</td>
@@ -653,7 +817,10 @@
         }
       });
 
-      const topEquip = baseDados.materiais.slice(0, 7);
+      const topEquip = [...baseDados.materiais]
+        .sort((a, b) => (b.qtdPropria + b.qtdSublocada) - (a.qtdPropria + a.qtdSublocada))
+        .slice(0, 7);
+
       if (chartEquipamentos) chartEquipamentos.destroy();
       chartEquipamentos = new Chart(document.getElementById('chart-equipamentos').getContext('2d'), {
         type: 'bar',
