@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Executiva LED e Eventos — Painel Gerencial</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            exec: {
+              bg: '#090b10',
+              card: '#11151f',
+              border: '#1f2636',
+              gold: '#e5be01',
+              goldHover: '#cfa900'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-exec-bg text-slate-100 font-sans min-h-screen flex flex-col">
+
+  <!-- TELA DE LOGIN GOOGLE RESTRITA -->
+  <div id="login-container" class="fixed inset-0 z-50 flex items-center justify-center bg-exec-bg p-4">
+    <div class="max-w-md w-full bg-exec-card border border-exec-border rounded-2xl p-8 shadow-2xl text-center space-y-6">
+      <div class="flex justify-center">
+        <div class="bg-black px-5 py-3 rounded-xl border border-exec-gold/40 shadow-lg">
+          <img src="https://lh3.googleusercontent.com/d/1j0qMmA0HaSH08-JHlHQ1HdgfGnQJmJQK" alt="Executiva LED e Eventos" class="h-12 object-contain">
+        </div>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold text-white tracking-wide">PAINEL GERENCIAL EXECUTIVA</h1>
+        <p class="text-slate-400 text-xs mt-1">Acesso restrito à diretoria • Autenticação Google</p>
+      </div>
+      <div id="g_id_onload"
+           data-client_id="698900358884-lqfh1vlne9u6hq2rnip2q28jva1f4dsg.apps.googleusercontent.com"
+           data-callback="handleCredentialResponse"
+           data-auto_prompt="false">
+      </div>
+      <div class="flex justify-center">
+        <div class="g_id_signin" data-type="standard" data-size="large" data-theme="filled_black"></div>
+      </div>
+      <p id="login-error" class="text-rose-400 text-xs hidden font-medium bg-rose-950/40 border border-rose-800/50 rounded-lg p-2.5"></p>
+      <div class="pt-4 border-t border-exec-border flex items-center justify-center space-x-2 text-[10px] text-slate-500">
+        <span>Tecnologia</span>
+        <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa" class="h-3.5 bg-white px-1.5 py-0.5 rounded">
+      </div>
+    </div>
+  </div>
+
+  <!-- CABEÇALHO SUPERIOR -->
+  <header class="bg-black/90 backdrop-blur-md border-b border-exec-gold/30 px-4 sm:px-6 py-3 flex flex-wrap justify-between items-center gap-3 sticky top-0 z-30">
+    <div class="flex items-center space-x-3">
+      <img src="https://lh3.googleusercontent.com/d/1j0qMmA0HaSH08-JHlHQ1HdgfGnQJmJQK" alt="Executiva LED" class="h-9 w-auto object-contain">
+      <div class="border-l border-exec-border pl-3">
+        <span class="text-xs sm:text-sm font-bold text-white block leading-tight tracking-wide">EXECUTIVA LED E EVENTOS</span>
+        <span class="text-[10px] text-exec-gold font-semibold uppercase tracking-widest">Inteligência Comercial & Acervo</span>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-2 sm:space-x-3">
+      <button onclick="carregarDadosDashboard()" title="Sincronizar planilha" class="bg-exec-gold/15 hover:bg-exec-gold/25 text-exec-gold border border-exec-gold/40 px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center space-x-1.5">
+        <i id="icon-refresh" class="fa-solid fa-rotate"></i>
+        <span class="hidden sm:inline">Sincronizar</span>
+      </button>
+      <div class="flex items-center space-x-2 bg-exec-card px-3 py-1.5 rounded-full border border-exec-border">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="user-email-display" class="text-xs text-slate-300 font-medium max-w-[120px] sm:max-w-none truncate"></span>
+      </div>
+      <button onclick="logout()" class="text-slate-400 hover:text-white text-xs font-semibold px-2 py-1 transition">Sair</button>
+    </div>
+  </header>
+
+  <!-- CONTEÚDO PRINCIPAL -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+    <!-- BARRA DE FILTROS GERAIS -->
+    <section class="bg-exec-card border border-exec-border rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center space-x-2 bg-exec-bg border border-exec-border rounded-xl px-3 py-2">
+          <i class="fa-regular fa-calendar text-exec-gold text-xs"></i>
+          <select id="filtro-periodo" onchange="aplicarFiltros()" class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none">
+            <option value="todos" class="bg-exec-card">Todo o Histórico</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2 bg-exec-bg border border-exec-border rounded-xl px-3 py-2">
+          <i class="fa-solid fa-filter text-emerald-400 text-xs"></i>
+          <select id="filtro-status" onchange="aplicarFiltros()" class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none">
+            <option value="todos" class="bg-exec-card">Todos os Status</option>
+            <option value="Aprovado" class="bg-exec-card">Aprovados / Confirmados</option>
+            <option value="Aguardando Aprovação" class="bg-exec-card">Aguardando Aprovação</option>
+            <option value="Recusado" class="bg-exec-card">Recusados / Cancelados</option>
+          </select>
+        </div>
+
+        <div class="flex items-center space-x-2 bg-exec-bg border border-exec-border rounded-xl px-3 py-2">
+          <i class="fa-solid fa-wallet text-sky-400 text-xs"></i>
+          <select id="filtro-financeiro" onchange="aplicarFiltros()" class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none">
+            <option value="todos" class="bg-exec-card">Situação Financeira: Todas</option>
+            <option value="quitado" class="bg-exec-card">100% Quitado</option>
+            <option value="pendente" class="bg-exec-card">Com Saldo a Receber</option>
+            <option value="vencido" class="bg-exec-card">Evento Realizado c/ Pendência</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="relative w-full md:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+        <input type="text" id="filtro-busca" oninput="aplicarFiltros()" placeholder="Buscar evento, cliente, local ou item..." class="w-full bg-exec-bg border border-exec-border rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-exec-gold transition">
+      </div>
+    </section>
+
+    <!-- CARDS DE KPIS -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-exec-gold rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Faturamento Fechado</span>
+            <h3 id="kpi-faturamento" class="text-xl font-bold text-white mt-1">R$ 0,00</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-exec-gold/15 flex items-center justify-center text-exec-gold">
+            <i class="fa-solid fa-file-signature text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-ticket" class="text-[11px] text-slate-400 mt-2">Ticket médio: R$ 0,00</p>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-emerald-500 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Entradas em Caixa</span>
+            <h3 id="kpi-recebido" class="text-xl font-bold text-emerald-400 mt-1">R$ 0,00</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400">
+            <i class="fa-solid fa-sack-dollar text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-recebido-pct" class="text-[11px] text-slate-400 mt-2">0% do faturado recebido</p>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-amber-500 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Saldo a Receber</span>
+            <h3 id="kpi-areceber" class="text-xl font-bold text-amber-400 mt-1">R$ 0,00</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-amber-500/15 flex items-center justify-center text-amber-400">
+            <i class="fa-solid fa-clock text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-vencido-alerta" class="text-[11px] text-rose-400 mt-2">R$ 0,00 pós-evento pendente</p>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-sky-500 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Conversão Comercial</span>
+            <h3 id="kpi-conversao" class="text-xl font-bold text-sky-400 mt-1">0,0%</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-sky-500/15 flex items-center justify-center text-sky-400">
+            <i class="fa-solid fa-bullseye text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-contratos-qtd" class="text-[11px] text-slate-400 mt-2">0 fechados / 0 orçados</p>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-purple-500 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Autonomia de Acervo</span>
+            <h3 id="kpi-autonomia" class="text-xl font-bold text-purple-400 mt-1">100%</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center text-purple-400">
+            <i class="fa-solid fa-boxes-stacked text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-equip-qtd" class="text-[11px] text-slate-400 mt-2">0 equipamentos movimentados</p>
+      </div>
+    </section>
+
+    <!-- GRÁFICOS ESTRATÉGICOS -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="lg:col-span-2 bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h2 class="text-sm font-bold text-white">Evolução Mensal: Contratos Fechados vs. Caixa</h2>
+            <p class="text-xs text-slate-400">Comparativo histórico de vendas aprovadas e entradas efetivas</p>
+          </div>
+        </div>
+        <div class="h-64">
+          <canvas id="chart-evolucao"></canvas>
+        </div>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+        <div>
+          <h2 class="text-sm font-bold text-white">Top Equipamentos Mais Alocados</h2>
+          <p class="text-xs text-slate-400 mb-3">Demanda de acervo nos contratos aprovados</p>
+        </div>
+        <div class="h-56">
+          <canvas id="chart-equipamentos"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- NAVEGAÇÃO DE HISTÓRICO COMPLETO -->
+    <section class="bg-exec-card border border-exec-border rounded-2xl shadow-lg overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-exec-border bg-black/50 flex flex-wrap justify-between items-center gap-3">
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="mudarAba('eventos')" id="tab-eventos" class="px-4 py-2 rounded-xl text-xs font-bold bg-exec-gold text-black transition">
+            <i class="fa-solid fa-calendar-check mr-1.5"></i> Eventos & Contratos (<span id="badge-eventos">0</span>)
+          </button>
+          <button onclick="mudarAba('pagamentos')" id="tab-pagamentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition">
+            <i class="fa-solid fa-money-bill-wave mr-1.5"></i> Pagamentos (<span id="badge-pagamentos">0</span>)
+          </button>
+          <button onclick="mudarAba('clientes')" id="tab-clientes" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition">
+            <i class="fa-solid fa-users mr-1.5"></i> Clientes (<span id="badge-clientes">0</span>)
+          </button>
+          <button onclick="mudarAba('materiais')" id="tab-materiais" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition">
+            <i class="fa-solid fa-lightbulb mr-1.5"></i> Materiais & Sublocação (<span id="badge-materiais">0</span>)
+          </button>
+        </div>
+        <span id="status-sync" class="text-[11px] text-slate-400">Aguardando sincronização...</span>
+      </div>
+
+      <!-- ABA 1: EVENTOS & ORÇAMENTOS -->
+      <div id="painel-eventos" class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4">Data Evento</th>
+              <th class="py-3 px-4">Evento / Local</th>
+              <th class="py-3 px-4">Cliente</th>
+              <th class="py-3 px-4">Status</th>
+              <th class="py-3 px-4 text-right">Valor Contrato</th>
+              <th class="py-3 px-4 text-right">Pago / Saldo</th>
+              <th class="py-3 px-4 text-right">Documentos</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-eventos" class="divide-y divide-exec-border/60 text-xs"></tbody>
+        </table>
+      </div>
+
+      <!-- ABA 2: PAGAMENTOS (RECEBIMENTOS) -->
+      <div id="painel-pagamentos" class="hidden overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4">Data Pagamento</th>
+              <th class="py-3 px-4">Cliente</th>
+              <th class="py-3 px-4">Evento / ID Orçamento</th>
+              <th class="py-3 px-4">Forma / Observação</th>
+              <th class="py-3 px-4 text-right">Valor Recebido</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-pagamentos" class="divide-y divide-exec-border/60 text-xs"></tbody>
+        </table>
+      </div>
+
+      <!-- ABA 3: CLIENTES -->
+      <div id="painel-clientes" class="hidden p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+      <!-- ABA 4: MATERIAIS & SUBLOCAÇÕES -->
+      <div id="painel-materiais" class="hidden overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-black/60 border-b border-exec-border text-[10px] uppercase tracking-wider text-slate-400">
+              <th class="py-3 px-4">Equipamento / Material</th>
+              <th class="py-3 px-4">Categoria</th>
+              <th class="py-3 px-4 text-center">Qtd Própria Alocada</th>
+              <th class="py-3 px-4 text-center">Qtd Sublocada</th>
+              <th class="py-3 px-4 text-center">Total Movimentado</th>
+              <th class="py-3 px-4">Parceiros Acionados</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-materiais" class="divide-y divide-exec-border/60 text-xs"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="border-t border-exec-border bg-black py-4 px-6 text-center text-[11px] text-slate-500">
+    Desenvolvido por <strong class="text-slate-300">Proativa Solutions</strong> • Gestão Inteligente Executiva LED e Eventos
+  </footer>
+
+  <script>
+    // SUBSTITUA PELA URL DO SEU WEB APP APPS SCRIPT DA EXECUTIVA
+    const APPS_SCRIPT_URL = "COLE_AQUI_A_URL_DO_WEB_APP_EXECUTIVA";
+    const EMAILS_AUTORIZADOS = ["edilsonfpcavalcanti@gmail.com", "solutionsproativa@gmail.com"];
+
+    let usuarioLogado = null;
+    let baseDados = { orcamentos: [], recebimentos: [], clientes: [], materiais: [] };
+    let chartEvolucao = null;
+    let chartEquipamentos = null;
+
+    function formatarMoeda(v) {
+      return (Number(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function formatarDataBR(iso) {
+      if (!iso) return '-';
+      const d = new Date(iso);
+      if (isNaN(d.getTime())) return iso;
+      return d.toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+    }
+
+    function parseJwt(token) {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      return JSON.parse(window.atob(base64));
+    }
+
+    function handleCredentialResponse(response) {
+      const payload = parseJwt(response.credential);
+      const email = String(payload.email || '').toLowerCase().trim();
+      if (EMAILS_AUTORIZADOS.includes(email)) {
+        usuarioLogado = email;
+        localStorage.setItem('executiva_user_email', usuarioLogado);
+        iniciarSessao();
+      } else {
+        const err = document.getElementById('login-error');
+        err.innerText = "Acesso restrito: O e-mail " + email + " não está autorizado a visualizar este painel.";
+        err.classList.remove('hidden');
+      }
+    }
+
+    function verificarSessao() {
+      const salvo = localStorage.getItem('executiva_user_email');
+      if (salvo && EMAILS_AUTORIZADOS.includes(salvo)) {
+        usuarioLogado = salvo;
+        iniciarSessao();
+      }
+    }
+
+    function iniciarSessao() {
+      document.getElementById('user-email-display').innerText = usuarioLogado;
+      document.getElementById('login-container').classList.add('hidden');
+      carregarDadosDashboard();
+    }
+
+    function logout() {
+      localStorage.removeItem('executiva_user_email');
+      location.reload();
+    }
+
+    async function carregarDadosDashboard() {
+      const icon = document.getElementById('icon-refresh');
+      const statusEl = document.getElementById('status-sync');
+      icon.classList.add('fa-spin');
+      statusEl.innerText = "Sincronizando dados...";
+
+      try {
+        const url = `${APPS_SCRIPT_URL}?action=getDashboardExecutiva&email=${encodeURIComponent(usuarioLogado)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.status === 'sucesso') {
+          baseDados = data;
+          popularFiltroPeriodos();
+          aplicarFiltros();
+          renderizarGraficos();
+          statusEl.innerText = "Atualizado às " + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        } else {
+          statusEl.innerText = "Erro: " + (data.mensagem || "Acesso negado");
+        }
+      } catch (err) {
+        console.error(err);
+        statusEl.innerText = "Falha de conexão com a planilha.";
+      } finally {
+        icon.classList.remove('fa-spin');
+      }
+    }
+
+    function popularFiltroPeriodos() {
+      const select = document.getElementById('filtro-periodo');
+      const atual = select.value;
+      const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+      const periodos = new Set();
+
+      baseDados.orcamentos.forEach(o => {
+        if (o.mesCompetencia) periodos.add(o.mesCompetencia);
+      });
+      baseDados.recebimentos.forEach(r => {
+        if (r.mesCompetencia) periodos.add(r.mesCompetencia);
+      });
+
+      const ordenados = Array.from(periodos).sort().reverse();
+      select.innerHTML = '<option value="todos" class="bg-exec-card">Todo o Histórico</option>';
+
+      ordenados.forEach(ym => {
+        const [ano, mes] = ym.split('-');
+        const opt = document.createElement('option');
+        opt.value = ym;
+        opt.text = `${mesesNomes[parseInt(mes, 10) - 1]}/${ano}`;
+        opt.className = 'bg-exec-card';
+        select.appendChild(opt);
+      });
+
+      if (atual && Array.from(select.options).some(o => o.value === atual)) {
+        select.value = atual;
+      }
+    }
+
+    function aplicarFiltros() {
+      const periodo = document.getElementById('filtro-periodo').value;
+      const statusFiltro = document.getElementById('filtro-status').value;
+      const finFiltro = document.getElementById('filtro-financeiro').value;
+      const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      const orcFiltrados = baseDados.orcamentos.filter(o => {
+        if (periodo !== 'todos' && o.mesCompetencia !== periodo) return false;
+        if (statusFiltro !== 'todos' && o.status !== statusFiltro) return false;
+
+        const saldo = o.valorTotal - o.valorPago;
+        const dtEv = o.dataEvento ? new Date(o.dataEvento) : null;
+        const vencido = o.status === 'Aprovado' && saldo > 0.01 && dtEv && dtEv < hoje;
+
+        if (finFiltro === 'quitado' && saldo > 0.01) return false;
+        if (finFiltro === 'pendente' && saldo <= 0.01) return false;
+        if (finFiltro === 'vencido' && !vencido) return false;
+
+        if (busca) {
+          const texto = `${o.nomeEvento} ${o.nomeCliente} ${o.localEvento} ${o.idOrcamento}`.toLowerCase();
+          if (!texto.includes(busca)) return false;
+        }
+        return true;
+      });
+
+      const recFiltrados = baseDados.recebimentos.filter(r => {
+        if (periodo !== 'todos' && r.mesCompetencia !== periodo) return false;
+        if (busca) {
+          const texto = `${r.nomeCliente} ${r.nomeEvento} ${r.idOrcamento} ${r.formaPagamento}`.toLowerCase();
+          if (!texto.includes(busca)) return false;
+        }
+        return true;
+      });
+
+      atualizarKPIs(orcFiltrados, recFiltrados);
+      renderizarEventos(orcFiltrados);
+      renderizarPagamentos(recFiltrados);
+      renderizarClientes(busca);
+      renderizarMateriais(periodo, busca);
+    }
+
+    function atualizarKPIs(orcs, recs) {
+      const aprovados = orcs.filter(o => o.status === 'Aprovado');
+      const faturamento = aprovados.reduce((acc, o) => acc + o.valorTotal, 0);
+      const ticket = aprovados.length > 0 ? faturamento / aprovados.length : 0;
+      const recebido = recs.reduce((acc, r) => acc + r.valorRecebido, 0);
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+      let saldoAReceber = 0;
+      let saldoVencido = 0;
+
+      aprovados.forEach(o => {
+        const saldo = Math.max(0, o.valorTotal - o.valorPago);
+        saldoAReceber += saldo;
+        const dtEv = o.dataEvento ? new Date(o.dataEvento) : null;
+        if (saldo > 0.01 && dtEv && dtEv < hoje) {
+          saldoVencido += saldo;
+        }
+      });
+
+      const conversao = orcs.length > 0 ? ((aprovados.length / orcs.length) * 100).toFixed(1) : '0,0';
+      const pctCaixa = faturamento > 0 ? ((recebido / faturamento) * 100).toFixed(1) : '0,0';
+
+      let totalProp = 0, totalSub = 0;
+      baseDados.materiais.forEach(m => {
+        totalProp += m.qtdPropria;
+        totalSub += m.qtdSublocada;
+      });
+      const totalEquip = totalProp + totalSub;
+      const autonomia = totalEquip > 0 ? ((totalProp / totalEquip) * 100).toFixed(1) : '100,0';
+
+      document.getElementById('kpi-faturamento').innerText = formatarMoeda(faturamento);
+      document.getElementById('kpi-ticket').innerText = `Ticket médio: ${formatarMoeda(ticket)}`;
+      document.getElementById('kpi-recebido').innerText = formatarMoeda(recebido);
+      document.getElementById('kpi-recebido-pct').innerText = `${pctCaixa.replace('.', ',')}% do faturado recebido`;
+      document.getElementById('kpi-areceber').innerText = formatarMoeda(saldoAReceber);
+      document.getElementById('kpi-vencido-alerta').innerText = `${formatarMoeda(saldoVencido)} pós-evento pendente`;
+      document.getElementById('kpi-conversao').innerText = `${conversao.replace('.', ',')}%`;
+      document.getElementById('kpi-contratos-qtd').innerText = `${aprovados.length} fechados / ${orcs.length} orçados`;
+      document.getElementById('kpi-autonomia').innerText = `${autonomia.replace('.', ',')}%`;
+      document.getElementById('kpi-equip-qtd').innerText = `${totalEquip} equipamentos movimentados`;
+    }
+
+    function renderizarEventos(lista) {
+      document.getElementById('badge-eventos').innerText = lista.length;
+      const tbody = document.getElementById('tbody-eventos');
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-500">Nenhum evento encontrado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(o => {
+        const saldo = Math.max(0, o.valorTotal - o.valorPago);
+        let badgeStatus = '';
+        if (o.status === 'Aprovado') {
+          badgeStatus = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">Aprovado</span>';
+        } else if (o.status === 'Aguardando Aprovação') {
+          badgeStatus = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">Aguardando</span>';
+        } else {
+          badgeStatus = `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-700/40 text-slate-400">${o.status}</span>`;
+        }
+
+        const docs = [];
+        if (o.pdfOrcamento) docs.push(`<a href="${o.pdfOrcamento}" target="_blank" class="text-exec-gold hover:underline text-[11px] font-semibold">Orç</a>`);
+        if (o.pdfContrato) docs.push(`<a href="${o.pdfContrato}" target="_blank" class="text-sky-400 hover:underline text-[11px] font-semibold">Contrato</a>`);
+        if (o.pdfChecklist) docs.push(`<a href="${o.pdfChecklist}" target="_blank" class="text-emerald-400 hover:underline text-[11px] font-semibold">Check</a>`);
+
+        return `
+          <tr class="hover:bg-black/40 transition">
+            <td class="py-3 px-4 font-medium text-slate-300 whitespace-nowrap">${formatarDataBR(o.dataEvento)}</td>
+            <td class="py-3 px-4">
+              <strong class="text-white block">${o.nomeEvento}</strong>
+              <span class="text-[10px] text-slate-400">${o.localEvento || 'Local não informado'}</span>
+            </td>
+            <td class="py-3 px-4 text-slate-300">${o.nomeCliente}</td>
+            <td class="py-3 px-4">${badgeStatus}</td>
+            <td class="py-3 px-4 text-right font-bold text-white">${formatarMoeda(o.valorTotal)}</td>
+            <td class="py-3 px-4 text-right">
+              <span class="text-emerald-400 font-semibold block">${formatarMoeda(o.valorPago)}</span>
+              <span class="text-[10px] ${saldo > 0 ? 'text-amber-400' : 'text-slate-500'}">Saldo: ${formatarMoeda(saldo)}</span>
+            </td>
+            <td class="py-3 px-4 text-right space-x-2">${docs.join(' • ') || '-'}</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function renderizarPagamentos(lista) {
+      document.getElementById('badge-pagamentos').innerText = lista.length;
+      const tbody = document.getElementById('tbody-pagamentos');
+      if (lista.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-slate-500">Nenhum pagamento registrado no filtro.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = lista.map(r => `
+        <tr class="hover:bg-black/40 transition">
+          <td class="py-3 px-4 text-slate-300 font-medium">${formatarDataBR(r.dataPagamento)}</td>
+          <td class="py-3 px-4 font-semibold text-white">${r.nomeCliente}</td>
+          <td class="py-3 px-4 text-slate-300">${r.nomeEvento} <span class="text-[10px] text-slate-500">(${r.idOrcamento})</span></td>
+          <td class="py-3 px-4 text-slate-400">${r.formaPagamento || '-'}</td>
+          <td class="py-3 px-4 text-right font-bold text-emerald-400">${formatarMoeda(r.valorRecebido)}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderizarClientes(busca) {
+      const filtrados = baseDados.clientes.filter(c => {
+        if (!busca) return true;
+        return `${c.nome} ${c.documento} ${c.telefone} ${c.email}`.toLowerCase().includes(busca);
+      });
+      document.getElementById('badge-clientes').innerText = filtrados.length;
+      const grid = document.getElementById('painel-clientes');
+
+      if (filtrados.length === 0) {
+        grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8 text-xs">Nenhum cliente encontrado.</div>';
+        return;
+      }
+
+      grid.innerHTML = filtrados.map(c => `
+        <div class="bg-exec-bg border border-exec-border rounded-xl p-4 flex flex-col justify-between space-y-3 hover:border-exec-gold/40 transition">
+          <div>
+            <h4 class="font-bold text-white text-xs truncate" title="${c.nome}">${c.nome}</h4>
+            <p class="text-[11px] text-slate-400 mt-0.5">${c.documento || 'CPF/CNPJ não informado'} • ${c.telefone || 'Sem telefone'}</p>
+          </div>
+          <div class="pt-2.5 border-t border-exec-border flex justify-between text-xs">
+            <div>
+              <span class="text-[10px] text-slate-500 block">Eventos Fechados</span>
+              <strong class="text-exec-gold">${c.qtdEventos} evento(s)</strong>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-500 block">Total Contratado</span>
+              <strong class="text-emerald-400">${formatarMoeda(c.totalContratado)}</strong>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderizarMateriais(periodo, busca) {
+      const filtrados = baseDados.materiais.filter(m => {
+        if (!busca) return true;
+        return `${m.nome} ${m.categoria} ${m.parceiros}`.toLowerCase().includes(busca);
+      });
+      document.getElementById('badge-materiais').innerText = filtrados.length;
+      const tbody = document.getElementById('tbody-materiais');
+
+      if (filtrados.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-slate-500">Nenhum material movimentado.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtrados.map(m => `
+        <tr class="hover:bg-black/40 transition">
+          <td class="py-3 px-4 font-bold text-white uppercase">${m.nome}</td>
+          <td class="py-3 px-4 text-slate-400">${m.categoria}</td>
+          <td class="py-3 px-4 text-center text-emerald-400 font-semibold">${m.qtdPropria} un</td>
+          <td class="py-3 px-4 text-center ${m.qtdSublocada > 0 ? 'text-rose-400 font-bold' : 'text-slate-500'}">${m.qtdSublocada} un</td>
+          <td class="py-3 px-4 text-center font-bold text-exec-gold">${m.qtdPropria + m.qtdSublocada} un</td>
+          <td class="py-3 px-4 text-slate-300 text-[11px]">${m.parceiros || 'Estoque Próprio'}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderizarGraficos() {
+      const mapaMes = {};
+      baseDados.orcamentos.forEach(o => {
+        if (o.status !== 'Aprovado' || !o.mesCompetencia) return;
+        if (!mapaMes[o.mesCompetencia]) mapaMes[o.mesCompetencia] = { faturado: 0, caixa: 0 };
+        mapaMes[o.mesCompetencia].faturado += o.valorTotal;
+      });
+      baseDados.recebimentos.forEach(r => {
+        if (!r.mesCompetencia) return;
+        if (!mapaMes[r.mesCompetencia]) mapaMes[r.mesCompetencia] = { faturado: 0, caixa: 0 };
+        mapaMes[r.mesCompetencia].caixa += r.valorRecebido;
+      });
+
+      const chaves = Object.keys(mapaMes).sort().slice(-12);
+      if (chartEvolucao) chartEvolucao.destroy();
+      chartEvolucao = new Chart(document.getElementById('chart-evolucao').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: chaves,
+          datasets: [
+            { label: 'Contratos Fechados (R$)', data: chaves.map(k => mapaMes[k].faturado), backgroundColor: '#e5be01', borderRadius: 5 },
+            { label: 'Entradas em Caixa (R$)', data: chaves.map(k => mapaMes[k].caixa), backgroundColor: '#10b981', borderRadius: 5 }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { labels: { color: '#cbd5e1', font: { size: 11 } } } },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { display: false } },
+            y: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2636' } }
+          }
+        }
+      });
+
+      const topEquip = baseDados.materiais.slice(0, 7);
+      if (chartEquipamentos) chartEquipamentos.destroy();
+      chartEquipamentos = new Chart(document.getElementById('chart-equipamentos').getContext('2d'), {
+        type: 'bar',
+        data: {
+          labels: topEquip.map(e => e.nome.substring(0, 22)),
+          datasets: [{
+            label: 'Unidades Alocadas',
+            data: topEquip.map(e => e.qtdPropria + e.qtdSublocada),
+            backgroundColor: '#e5be01',
+            borderRadius: 4
+          }]
+        },
+        options: {
+          indexAxis: 'y',
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2636' } },
+            y: { ticks: { color: '#e2e8f0', font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    }
+
+    function mudarAba(aba) {
+      ['eventos', 'pagamentos', 'clientes', 'materiais'].forEach(nome => {
+        document.getElementById('painel-' + nome).classList.toggle('hidden', nome !== aba);
+        const btn = document.getElementById('tab-' + nome);
+        btn.className = nome === aba
+          ? 'px-4 py-2 rounded-xl text-xs font-bold bg-exec-gold text-black transition'
+          : 'px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', verificarSessao);
+  </script>
+</body>
+</html>
