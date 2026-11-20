@@ -67,7 +67,7 @@
   <!-- CONTEÚDO PRINCIPAL -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <!-- BARRA DE FILTROS -->
+    <!-- BARRA DE FILTROS GERAIS -->
     <section class="bg-slate-900/70 border border-slate-800 rounded-2xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
       <div class="flex flex-wrap items-center gap-2">
         <div class="flex items-center space-x-2 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2">
@@ -94,13 +94,14 @@
             <option value="todos" class="bg-slate-900">Todos os Tipos</option>
             <option value="Mensalidade" class="bg-slate-900">Mensalidade</option>
             <option value="Implantação" class="bg-slate-900">Implantação</option>
+            <option value="Anuidade" class="bg-slate-900">Anuidade</option>
           </select>
         </div>
       </div>
 
       <div class="relative w-full md:w-72">
         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
-        <input type="text" id="filtro-busca" oninput="aplicarFiltros()" placeholder="Buscar cliente ou nº da fatura..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+        <input type="text" id="filtro-busca" oninput="sincronizarBusca(this.value)" placeholder="Buscar cliente ou nº da fatura..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
       </div>
     </section>
 
@@ -189,7 +190,7 @@
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
         <div>
           <h2 class="text-sm font-bold text-white">Composição da Receita</h2>
-          <p class="text-xs text-slate-400 mb-4">Mensalidades vs. Implantações</p>
+          <p class="text-xs text-slate-400 mb-4">Mensalidades, Implantações e Anuidades</p>
         </div>
         <div class="h-52 flex items-center justify-center">
           <canvas id="chart-composicao"></canvas>
@@ -201,27 +202,61 @@
     <!-- ABAS: EXTRATO FINANCEIRO vs. CARTEIRA DE CLIENTES PROATIVA -->
     <section class="bg-slate-900 border border-slate-800 rounded-2xl shadow-lg overflow-hidden">
       <div class="px-5 py-3.5 border-b border-slate-800 bg-slate-950/60 flex flex-wrap justify-between items-center gap-3">
-        <div class="flex space-x-2">
+        <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button onclick="alternarAbaTabela('parcelas')" id="btn-tab-parcelas" class="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 text-white transition">
             <i class="fa-solid fa-file-invoice-dollar mr-1.5"></i> Faturas & Parcelas (<span id="count-parcelas">0</span>)
           </button>
           <button onclick="alternarAbaTabela('clientes')" id="btn-tab-clientes" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition">
             <i class="fa-solid fa-users mr-1.5"></i> Clientes Proativa (<span id="count-clientes">0</span>)
           </button>
+
+          <!-- NOVA CAIXA DE PESQUISA AO LADO DE CLIENTES PROATIVA -->
+          <div class="relative flex-1 sm:w-64 min-w-[200px] sm:ml-2">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs"></i>
+            <input type="text" id="filtro-busca-tabela" oninput="sincronizarBusca(this.value)" placeholder="Pesquisar na lista..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-8 pr-7 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition">
+            <button id="btn-limpar-busca" onclick="sincronizarBusca('')" title="Limpar pesquisa" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 text-xs">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
         <span id="status-carregamento" class="text-xs text-slate-400">Sincronizado com Google Sheets</span>
       </div>
 
-      <!-- TABELA DE PARCELAS FINANCEIRAS -->
+      <!-- TABELA DE PARCELAS FINANCEIRAS (COM ORDENAÇÃO EM TODAS AS COLUNAS) -->
       <div id="view-parcelas" class="overflow-x-auto">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400">
-              <th class="py-3 px-4 font-semibold">Cliente</th>
-              <th class="py-3 px-4 font-semibold">Fatura / Tipo</th>
-              <th class="py-3 px-4 font-semibold">Vencimento</th>
-              <th class="py-3 px-4 font-semibold">Valor</th>
-              <th class="py-3 px-4 font-semibold">Status</th>
+            <tr class="bg-slate-950/80 border-b border-slate-800 text-[11px] uppercase tracking-wider text-slate-400 select-none">
+              <th onclick="ordenarTabela('nomeCliente')" class="py-3 px-4 font-semibold cursor-pointer hover:text-white transition group">
+                <div class="flex items-center space-x-1.5">
+                  <span>Cliente</span>
+                  <i id="sort-icon-nomeCliente" class="fa-solid fa-sort text-slate-600 group-hover:text-slate-400"></i>
+                </div>
+              </th>
+              <th onclick="ordenarTabela('tipoFatura')" class="py-3 px-4 font-semibold cursor-pointer hover:text-white transition group">
+                <div class="flex items-center space-x-1.5">
+                  <span>Fatura / Tipo</span>
+                  <i id="sort-icon-tipoFatura" class="fa-solid fa-sort text-slate-600 group-hover:text-slate-400"></i>
+                </div>
+              </th>
+              <th onclick="ordenarTabela('vencimento')" class="py-3 px-4 font-semibold cursor-pointer hover:text-white transition group">
+                <div class="flex items-center space-x-1.5">
+                  <span>Vencimento</span>
+                  <i id="sort-icon-vencimento" class="fa-solid fa-sort-down text-indigo-400"></i>
+                </div>
+              </th>
+              <th onclick="ordenarTabela('valor')" class="py-3 px-4 font-semibold cursor-pointer hover:text-white transition group">
+                <div class="flex items-center space-x-1.5">
+                  <span>Valor</span>
+                  <i id="sort-icon-valor" class="fa-solid fa-sort text-slate-600 group-hover:text-slate-400"></i>
+                </div>
+              </th>
+              <th onclick="ordenarTabela('status')" class="py-3 px-4 font-semibold cursor-pointer hover:text-white transition group">
+                <div class="flex items-center space-x-1.5">
+                  <span>Status</span>
+                  <i id="sort-icon-status" class="fa-solid fa-sort text-slate-600 group-hover:text-slate-400"></i>
+                </div>
+              </th>
               <th class="py-3 px-4 font-semibold text-right">Ações</th>
             </tr>
           </thead>
@@ -251,6 +286,9 @@
     let parcelasBase = [];
     let chartFaturamento = null;
     let chartComposicao = null;
+
+    // Estado de ordenação da tabela
+    let ordemAtual = { coluna: 'vencimento', direcao: 'desc' };
 
     function formatarMoeda(valor) {
       return (Number(valor) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -301,6 +339,24 @@
       location.reload();
     }
 
+    function sincronizarBusca(valor) {
+      const inputTopo = document.getElementById('filtro-busca');
+      const inputTabela = document.getElementById('filtro-busca-tabela');
+      const btnLimpar = document.getElementById('btn-limpar-busca');
+
+      if (inputTopo.value !== valor) inputTopo.value = valor;
+      if (inputTabela.value !== valor) inputTabela.value = valor;
+
+      if (valor && valor.trim() !== '') {
+        btnLimpar.classList.remove('hidden');
+      } else {
+        btnLimpar.classList.add('hidden');
+      }
+
+      aplicarFiltros();
+      renderizarClientes();
+    }
+
     function popularFiltroMeses() {
       const select = document.getElementById('filtro-periodo');
       const valorSelecionadoAntes = select.value;
@@ -308,7 +364,6 @@
       const mesAtualKey = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
       const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-      // Coleta todos os meses/anos únicos existentes nas parcelas do banco (garantindo inclusão do mês atual)
       const mesesUnicos = new Set([mesAtualKey]);
       parcelasBase.forEach(p => {
         if (!p.vencimento) return;
@@ -319,10 +374,7 @@
         }
       });
 
-      // Ordena cronologicamente do mais antigo para o mais recente
       const chavesOrdenadas = Array.from(mesesUnicos).sort();
-
-      // Reconstrói as opções mantendo "Mês Atual" e "Todo o Período" no topo
       select.innerHTML = '';
 
       const optAtual = document.createElement('option');
@@ -338,7 +390,7 @@
       select.appendChild(optTodos);
 
       chavesOrdenadas.forEach(ym => {
-        if (ym === mesAtualKey) return; // Já está no topo como "Mês Atual"
+        if (ym === mesAtualKey) return;
         const [ano, mesStr] = ym.split('-');
         const mesIdx = parseInt(mesStr, 10) - 1;
         const opt = document.createElement('option');
@@ -348,7 +400,6 @@
         select.appendChild(opt);
       });
 
-      // Preserva a seleção caso o usuário clique em "Atualizar"
       if (valorSelecionadoAntes && Array.from(select.options).some(o => o.value === valorSelecionadoAntes)) {
         select.value = valorSelecionadoAntes;
       } else {
@@ -367,7 +418,6 @@
         const data = await res.json();
 
         if (data.status === 'sucesso') {
-          // Garantia dupla no frontend: exclui qualquer menção a Adilson ou Adinaldo
           clientesBase = (data.clientes || []).filter(c => {
             const resp = String(c.responsavel || '').toLowerCase();
             return !resp.includes('adilson') && !resp.includes('adinaldo');
@@ -375,6 +425,31 @@
 
           const idsClientesValidos = new Set(clientesBase.map(c => c.idCliente));
           parcelasBase = (data.parcelas || []).filter(p => idsClientesValidos.has(p.idCliente));
+
+          // Enriquece cada cliente com o Tipo real (Anuidade / Mensalidade) e o Total Pago
+          clientesBase.forEach(c => {
+            const parcelasCli = parcelasBase.filter(p => p.idCliente === c.idCliente);
+
+            // Soma todas as parcelas pagas do cliente
+            c.totalPago = parcelasCli
+              .filter(p => p.pago)
+              .reduce((acc, p) => acc + (Number(p.valor) || 0), 0);
+
+            // Identifica o tipo predominante (prioriza Anuidade se houver parcela registrada como Anuidade)
+            const parcAnuidade = parcelasCli.find(p => String(p.tipo || '').toLowerCase().includes('anuidad'));
+            if (parcAnuidade) {
+              c.tipoPlano = 'Anuidade';
+              if (!c.valorMensalAtivo || Number(c.valorMensalAtivo) === 0) {
+                c.valorMensalAtivo = Number(parcAnuidade.valor) || 0;
+              }
+            } else {
+              const parcMensal = parcelasCli.find(p => String(p.tipo || '').toLowerCase().includes('mensal'));
+              c.tipoPlano = parcMensal ? 'Mensalidade' : (parcelasCli[0]?.tipo || 'Mensalidade');
+              if ((!c.valorMensalAtivo || Number(c.valorMensalAtivo) === 0) && parcelasCli.length > 0) {
+                c.valorMensalAtivo = Number(parcelasCli[0].valor) || 0;
+              }
+            }
+          });
 
           popularFiltroMeses();
           aplicarFiltros();
@@ -401,6 +476,31 @@
       return (!isNaN(venc.getTime()) && venc < hoje) ? 'vencida' : 'pendente';
     }
 
+    function ordenarTabela(coluna) {
+      if (ordemAtual.coluna === coluna) {
+        ordemAtual.direcao = ordemAtual.direcao === 'asc' ? 'desc' : 'asc';
+      } else {
+        ordemAtual.coluna = coluna;
+        ordemAtual.direcao = (coluna === 'vencimento' || coluna === 'valor') ? 'desc' : 'asc';
+      }
+
+      // Atualiza os ícones visuais nos cabeçalhos
+      const colunas = ['nomeCliente', 'tipoFatura', 'vencimento', 'valor', 'status'];
+      colunas.forEach(col => {
+        const icone = document.getElementById('sort-icon-' + col);
+        if (!icone) return;
+        if (col === ordemAtual.coluna) {
+          icone.className = ordemAtual.direcao === 'asc'
+            ? 'fa-solid fa-sort-up text-indigo-400'
+            : 'fa-solid fa-sort-down text-indigo-400';
+        } else {
+          icone.className = 'fa-solid fa-sort text-slate-600 group-hover:text-slate-400';
+        }
+      });
+
+      aplicarFiltros();
+    }
+
     function aplicarFiltros() {
       const periodo = document.getElementById('filtro-periodo').value;
       const statusFiltro = document.getElementById('filtro-status').value;
@@ -422,13 +522,15 @@
         if (tipoFiltro !== 'todos') {
           const tipoNorm = String(p.tipo || '').toLowerCase();
           if (tipoFiltro === 'Implantação' && !tipoNorm.includes('implanta')) return false;
-          if (tipoFiltro === 'Mensalidade' && tipoNorm.includes('implanta')) return false;
+          if (tipoFiltro === 'Anuidade' && !tipoNorm.includes('anuidad')) return false;
+          if (tipoFiltro === 'Mensalidade' && (tipoNorm.includes('implanta') || tipoNorm.includes('anuidad'))) return false;
         }
 
         if (busca) {
           const matchNome = String(p.nomeCliente || '').toLowerCase().includes(busca);
           const matchId = String(p.idParcela || '').toLowerCase().includes(busca);
-          if (!matchNome && !matchId) return false;
+          const matchTipo = String(p.tipo || '').toLowerCase().includes(busca);
+          if (!matchNome && !matchId && !matchTipo) return false;
         }
 
         return true;
@@ -457,7 +559,7 @@
         }
       });
 
-      const clientesAtivos = clientesBase.filter(c => c.ativo);
+      const clientesAtivos = clientesBase.filter(c => c.ativo && c.tipoPlano !== 'Anuidade');
       const mrrTotal = clientesAtivos.reduce((acc, c) => acc + (Number(c.valorMensalAtivo) || 0), 0);
 
       document.getElementById('kpi-recebido').innerText = formatarMoeda(totalRecebido);
@@ -471,7 +573,7 @@
 
       document.getElementById('kpi-mrr').innerText = formatarMoeda(mrrTotal);
       document.getElementById('kpi-clientes').innerText = clientesBase.length;
-      document.getElementById('kpi-clientes-sub').innerText = `${clientesAtivos.length} ativos na carteira`;
+      document.getElementById('kpi-clientes-sub').innerText = `${clientesBase.filter(c => c.ativo).length} ativos na carteira`;
     }
 
     function renderizarTabelaParcelas(lista) {
@@ -483,8 +585,34 @@
         return;
       }
 
-      // Ordena por vencimento mais recente primeiro
-      const ordenadas = [...lista].sort((a, b) => new Date(b.vencimento) - new Date(a.vencimento));
+      const pesoStatus = { 'vencida': 1, 'pendente': 2, 'pago': 3 };
+      const mult = ordemAtual.direcao === 'asc' ? 1 : -1;
+
+      const ordenadas = [...lista].sort((a, b) => {
+        switch (ordemAtual.coluna) {
+          case 'nomeCliente':
+            return String(a.nomeCliente || '').localeCompare(String(b.nomeCliente || ''), 'pt-BR') * mult;
+          case 'tipoFatura': {
+            const cmpTipo = String(a.tipo || '').localeCompare(String(b.tipo || ''), 'pt-BR');
+            if (cmpTipo !== 0) return cmpTipo * mult;
+            return ((Number(a.numeroParcela) || 0) - (Number(b.numeroParcela) || 0)) * mult;
+          }
+          case 'vencimento': {
+            const tA = new Date(a.vencimento).getTime() || 0;
+            const tB = new Date(b.vencimento).getTime() || 0;
+            return (tA - tB) * mult;
+          }
+          case 'valor':
+            return ((Number(a.valor) || 0) - (Number(b.valor) || 0)) * mult;
+          case 'status': {
+            const stA = pesoStatus[obterStatusParcela(a)] || 99;
+            const stB = pesoStatus[obterStatusParcela(b)] || 99;
+            return (stA - stB) * mult;
+          }
+          default:
+            return 0;
+        }
+      });
 
       tbody.innerHTML = ordenadas.map(p => {
         const st = obterStatusParcela(p);
@@ -532,36 +660,57 @@
 
     function renderizarClientes() {
       const container = document.getElementById('view-clientes');
-      document.getElementById('count-clientes').innerText = clientesBase.length;
+      const busca = document.getElementById('filtro-busca').value.trim().toLowerCase();
 
-      if (clientesBase.length === 0) {
-        container.innerHTML = `<div class="col-span-full text-center text-slate-500 text-xs py-8">Nenhum cliente Proativa encontrado.</div>`;
+      const clientesFiltrados = clientesBase.filter(c => {
+        if (!busca) return true;
+        return String(c.nome || '').toLowerCase().includes(busca) ||
+               String(c.descricaoProjeto || '').toLowerCase().includes(busca) ||
+               String(c.cidade || '').toLowerCase().includes(busca) ||
+               String(c.tipoPlano || '').toLowerCase().includes(busca);
+      });
+
+      document.getElementById('count-clientes').innerText = clientesFiltrados.length;
+
+      if (clientesFiltrados.length === 0) {
+        container.innerHTML = `<div class="col-span-full text-center text-slate-500 text-xs py-8">Nenhum cliente Proativa encontrado para a pesquisa.</div>`;
         return;
       }
 
-      container.innerHTML = clientesBase.map(c => `
-        <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex items-center justify-between space-x-3 hover:border-indigo-500/40 transition">
-          <div class="flex items-center space-x-3 min-w-0">
-            <img src="${c.logo}" class="w-11 h-11 rounded-xl object-contain bg-white p-1 shrink-0" onerror="this.src='https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO'">
-            <div class="min-w-0">
-              <div class="flex items-center space-x-2">
-                <h4 class="font-bold text-white text-xs truncate">${c.nome}</h4>
-                <span class="w-2 h-2 rounded-full ${c.ativo ? 'bg-emerald-400' : 'bg-slate-600'} shrink-0" title="${c.ativo ? 'Ativo' : 'Inativo'}"></span>
+      container.innerHTML = clientesFiltrados.map(c => {
+        const labelPlano = c.tipoPlano || 'Mensalidade';
+        const corPlano = labelPlano.toLowerCase().includes('anuidad') ? 'text-amber-300' : 'text-indigo-300';
+
+        return `
+          <div class="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 flex flex-col justify-between space-y-3 hover:border-indigo-500/40 transition">
+            <div class="flex items-center space-x-3 min-w-0">
+              <img src="${c.logo}" class="w-11 h-11 rounded-xl object-contain bg-white p-1 shrink-0" onerror="this.src='https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO'">
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center space-x-2">
+                  <h4 class="font-bold text-white text-xs truncate" title="${c.nome}">${c.nome}</h4>
+                  <span class="w-2 h-2 rounded-full ${c.ativo ? 'bg-emerald-400' : 'bg-slate-600'} shrink-0" title="${c.ativo ? 'Ativo' : 'Inativo'}"></span>
+                </div>
+                <p class="text-[11px] text-slate-400 truncate mt-0.5">${c.descricaoProjeto || c.ramo || 'Solução Proativa'}</p>
+                <span class="text-[10px] text-indigo-400 font-semibold block mt-1">Vencimento dia ${c.melhorVencimento} ${c.cidade ? '• ' + c.cidade : ''}</span>
               </div>
-              <p class="text-[11px] text-slate-400 truncate mt-0.5">${c.descricaoProjeto || c.ramo || 'Solução Proativa'}</p>
-              <span class="text-[10px] text-indigo-400 font-semibold block mt-1">Vencimento dia ${c.melhorVencimento} ${c.cidade ? '• ' + c.cidade : ''}</span>
+            </div>
+
+            <div class="pt-2.5 border-t border-slate-800/80 flex items-center justify-between">
+              <div>
+                <span class="text-[10px] text-slate-400 block">${labelPlano}</span>
+                <span class="text-xs font-bold ${corPlano}">${formatarMoeda(c.valorMensalAtivo)}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-[10px] text-slate-400 block">Total Pago</span>
+                <span class="text-xs font-bold text-emerald-400">${formatarMoeda(c.totalPago)}</span>
+              </div>
             </div>
           </div>
-          <div class="text-right shrink-0">
-            <span class="text-[10px] text-slate-400 block">Mensalidade</span>
-            <span class="text-xs font-bold text-emerald-400">${formatarMoeda(c.valorMensalAtivo)}</span>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function renderizarGraficos() {
-      // 1. Agrupamento por Mês (últimos 6 meses + próximos)
       const mapaMeses = {};
       const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
@@ -616,11 +765,14 @@
         }
       });
 
-      // 2. Composição: Mensalidade vs Implantação
       let totalMensalidade = 0;
       let totalImplantacao = 0;
+      let totalAnuidade = 0;
+
       parcelasBase.forEach(p => {
-        if (String(p.tipo || '').toLowerCase().includes('implanta')) totalImplantacao += p.valor;
+        const tipoNorm = String(p.tipo || '').toLowerCase();
+        if (tipoNorm.includes('implanta')) totalImplantacao += p.valor;
+        else if (tipoNorm.includes('anuidad')) totalAnuidade += p.valor;
         else totalMensalidade += p.valor;
       });
 
@@ -629,10 +781,10 @@
       chartComposicao = new Chart(ctxComp, {
         type: 'doughnut',
         data: {
-          labels: ['Mensalidades', 'Implantações'],
+          labels: ['Mensalidades', 'Implantações', 'Anuidades'],
           datasets: [{
-            data: [totalMensalidade, totalImplantacao],
-            backgroundColor: ['#6366f1', '#10b981'],
+            data: [totalMensalidade, totalImplantacao, totalAnuidade],
+            backgroundColor: ['#6366f1', '#10b981', '#f59e0b'],
             borderColor: '#0f172a',
             borderWidth: 3
           }]
@@ -649,14 +801,19 @@
 
       document.getElementById('legenda-composicao').innerHTML = `
         <div class="text-center">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-indigo-500 mr-1"></span>
-          <span class="text-slate-400">Mensalidades:</span>
-          <strong class="text-white block mt-0.5">${formatarMoeda(totalMensalidade)}</strong>
+          <span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1"></span>
+          <span class="text-slate-400 text-[11px]">Mensalidades</span>
+          <strong class="text-white block mt-0.5 text-[11px]">${formatarMoeda(totalMensalidade)}</strong>
         </div>
         <div class="text-center">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1"></span>
-          <span class="text-slate-400">Implantações:</span>
-          <strong class="text-white block mt-0.5">${formatarMoeda(totalImplantacao)}</strong>
+          <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>
+          <span class="text-slate-400 text-[11px]">Implantações</span>
+          <strong class="text-white block mt-0.5 text-[11px]">${formatarMoeda(totalImplantacao)}</strong>
+        </div>
+        <div class="text-center">
+          <span class="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span>
+          <span class="text-slate-400 text-[11px]">Anuidades</span>
+          <strong class="text-white block mt-0.5 text-[11px]">${formatarMoeda(totalAnuidade)}</strong>
         </div>
       `;
     }
