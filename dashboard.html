@@ -293,7 +293,6 @@
     function iniciarSessao() {
       document.getElementById('user-email-display').innerText = usuarioLogado;
       document.getElementById('login-container').classList.add('hidden');
-      popularFiltroMeses();
       carregarDadosDashboard();
     }
 
@@ -304,23 +303,56 @@
 
     function popularFiltroMeses() {
       const select = document.getElementById('filtro-periodo');
+      const valorSelecionadoAntes = select.value;
       const hoje = new Date();
+      const mesAtualKey = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
       const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
 
-      for (let i = -3; i <= 3; i++) {
-        const d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
-        const val = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        const label = `${mesesNomes[d.getMonth()]}/${d.getFullYear()}`;
-        if (i === 0) {
-          select.options[0].value = val;
-          select.options[0].text = `Mês Atual (${label})`;
-        } else {
-          const opt = document.createElement('option');
-          opt.value = val;
-          opt.text = label;
-          opt.className = 'bg-slate-900';
-          select.appendChild(opt);
+      // Coleta todos os meses/anos únicos existentes nas parcelas do banco (garantindo inclusão do mês atual)
+      const mesesUnicos = new Set([mesAtualKey]);
+      parcelasBase.forEach(p => {
+        if (!p.vencimento) return;
+        const d = new Date(p.vencimento);
+        if (!isNaN(d.getTime())) {
+          const ym = `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+          mesesUnicos.add(ym);
         }
+      });
+
+      // Ordena cronologicamente do mais antigo para o mais recente
+      const chavesOrdenadas = Array.from(mesesUnicos).sort();
+
+      // Reconstrói as opções mantendo "Mês Atual" e "Todo o Período" no topo
+      select.innerHTML = '';
+
+      const optAtual = document.createElement('option');
+      optAtual.value = mesAtualKey;
+      optAtual.text = `Mês Atual (${mesesNomes[hoje.getMonth()]}/${hoje.getFullYear()})`;
+      optAtual.className = 'bg-slate-900';
+      select.appendChild(optAtual);
+
+      const optTodos = document.createElement('option');
+      optTodos.value = 'todos';
+      optTodos.text = 'Todo o Período';
+      optTodos.className = 'bg-slate-900';
+      select.appendChild(optTodos);
+
+      chavesOrdenadas.forEach(ym => {
+        if (ym === mesAtualKey) return; // Já está no topo como "Mês Atual"
+        const [ano, mesStr] = ym.split('-');
+        const mesIdx = parseInt(mesStr, 10) - 1;
+        const opt = document.createElement('option');
+        opt.value = ym;
+        opt.text = `${mesesNomes[mesIdx]}/${ano}`;
+        opt.className = 'bg-slate-900';
+        select.appendChild(opt);
+      });
+
+      // Preserva a seleção caso o usuário clique em "Atualizar"
+      if (valorSelecionadoAntes && Array.from(select.options).some(o => o.value === valorSelecionadoAntes)) {
+        select.value = valorSelecionadoAntes;
+      } else {
+        select.value = mesAtualKey;
       }
     }
 
@@ -344,6 +376,7 @@
           const idsClientesValidos = new Set(clientesBase.map(c => c.idCliente));
           parcelasBase = (data.parcelas || []).filter(p => idsClientesValidos.has(p.idCliente));
 
+          popularFiltroMeses();
           aplicarFiltros();
           renderizarClientes();
           renderizarGraficos();
