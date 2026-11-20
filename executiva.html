@@ -189,7 +189,7 @@
     </section>
 
     <!-- CARDS DE KPIS -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       <div class="bg-exec-card border border-exec-border border-l-4 border-l-exec-gold rounded-2xl p-4 shadow-lg">
         <div class="flex justify-between items-start">
           <div>
@@ -227,6 +227,19 @@
           </div>
         </div>
         <p id="kpi-vencido-alerta" class="text-[11px] text-rose-400 mt-2">R$ 0,00 pós-evento pendente</p>
+      </div>
+
+      <div class="bg-exec-card border border-exec-border border-l-4 border-l-cyan-500 rounded-2xl p-4 shadow-lg">
+        <div class="flex justify-between items-start">
+          <div>
+            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Pipeline em Negociação</span>
+            <h3 id="kpi-pipeline" class="text-xl font-bold text-cyan-400 mt-1">R$ 0,00</h3>
+          </div>
+          <div class="w-8 h-8 rounded-lg bg-cyan-500/15 flex items-center justify-center text-cyan-400">
+            <i class="fa-solid fa-filter-circle-dollar text-xs"></i>
+          </div>
+        </div>
+        <p id="kpi-pipeline-sub" class="text-[11px] text-slate-400 mt-2">0 em aberto • Total orçado: R$ 0,00</p>
       </div>
 
       <div class="bg-exec-card border border-exec-border border-l-4 border-l-sky-500 rounded-2xl p-4 shadow-lg">
@@ -723,7 +736,10 @@
 
     function atualizarKPIs(orcs, recs) {
       const aprovados = orcs.filter(o => o.status === 'Aprovado');
+      const emNegociacao = orcs.filter(o => o.status !== 'Aprovado' && o.status !== 'Recusado' && o.status !== 'Cancelado');
       const faturamento = aprovados.reduce((acc, o) => acc + o.valorTotal, 0);
+      const pipelineValor = emNegociacao.reduce((acc, o) => acc + (Number(o.valorTotal) || 0), 0);
+      const totalOrcadoGeral = faturamento + pipelineValor;
       const ticket = aprovados.length > 0 ? faturamento / aprovados.length : 0;
       const recebido = recs.reduce((acc, r) => acc + r.valorRecebido, 0);
 
@@ -758,6 +774,8 @@
       document.getElementById('kpi-recebido-pct').innerText = `${pctCaixa.replace('.', ',')}% do faturado recebido`;
       document.getElementById('kpi-areceber').innerText = formatarMoeda(saldoAReceber);
       document.getElementById('kpi-vencido-alerta').innerText = `${formatarMoeda(saldoVencido)} pós-evento pendente`;
+      document.getElementById('kpi-pipeline').innerText = formatarMoeda(pipelineValor);
+      document.getElementById('kpi-pipeline-sub').innerText = `${emNegociacao.length} em aberto • Total orçado: ${formatarMoeda(totalOrcadoGeral)}`;
       document.getElementById('kpi-conversao').innerText = `${conversao.replace('.', ',')}%`;
       document.getElementById('kpi-contratos-qtd').innerText = `${aprovados.length} fechados / ${orcs.length} orçados`;
       document.getElementById('kpi-autonomia').innerText = `${autonomia.replace('.', ',')}%`;
