@@ -383,7 +383,24 @@
       </div>
 
       <!-- ABA 3: CLIENTES -->
-      <div id="painel-clientes" class="hidden p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="painel-clientes" class="hidden p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-exec-border/70">
+          <span class="text-xs text-slate-400">
+            Exibindo <strong id="clientes-exibidos-count" class="text-white">0</strong> cliente(s) cadastrado(s)
+          </span>
+          <div class="flex items-center space-x-2 bg-exec-bg border border-exec-border rounded-xl px-3 py-1.5 self-start sm:self-auto">
+            <i class="fa-solid fa-arrow-down-wide-short text-exec-gold text-xs"></i>
+            <label for="ordenar-clientes" class="text-[11px] text-slate-400 font-medium">Classificar por:</label>
+            <select id="ordenar-clientes" onchange="aplicarFiltros()" class="bg-transparent text-xs text-slate-200 font-semibold focus:outline-none cursor-pointer">
+              <option value="eventos_valor" class="bg-exec-card">Qtd. Eventos (Maior → Menor) + Valor</option>
+              <option value="valor_desc" class="bg-exec-card">Total Contratado (Maior → Menor)</option>
+              <option value="nome_asc" class="bg-exec-card">Nome do Cliente (A → Z)</option>
+              <option value="nome_desc" class="bg-exec-card">Nome do Cliente (Z → A)</option>
+            </select>
+          </div>
+        </div>
+        <div id="grid-clientes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      </div>
 
       <!-- ABA 4: MATERIAIS & SUBLOCAÇÕES -->
       <div id="painel-materiais" class="hidden overflow-x-auto">
@@ -891,15 +908,41 @@
         if (!busca) return true;
         return `${c.nome} ${c.documento} ${c.telefone} ${c.email}`.toLowerCase().includes(busca);
       });
-      document.getElementById('badge-clientes').innerText = filtrados.length;
-      const grid = document.getElementById('painel-clientes');
 
-      if (filtrados.length === 0) {
+      const criterio = document.getElementById('ordenar-clientes')?.value || 'eventos_valor';
+      const ordenados = [...filtrados].sort((a, b) => {
+        const evA = Number(a.qtdEventos) || 0;
+        const evB = Number(b.qtdEventos) || 0;
+        const valA = Number(a.totalContratado) || 0;
+        const valB = Number(b.totalContratado) || 0;
+
+        if (criterio === 'eventos_valor') {
+          if (evB !== evA) return evB - evA;
+          if (valB !== valA) return valB - valA;
+          return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' });
+        }
+        if (criterio === 'valor_desc') {
+          if (valB !== valA) return valB - valA;
+          if (evB !== evA) return evB - evA;
+          return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' });
+        }
+        if (criterio === 'nome_desc') {
+          return String(b.nome || '').localeCompare(String(a.nome || ''), 'pt-BR', { sensitivity: 'base' });
+        }
+        return String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' });
+      });
+
+      document.getElementById('badge-clientes').innerText = ordenados.length;
+      const countEl = document.getElementById('clientes-exibidos-count');
+      if (countEl) countEl.innerText = ordenados.length;
+      const grid = document.getElementById('grid-clientes');
+
+      if (ordenados.length === 0) {
         grid.innerHTML = '<div class="col-span-full text-center text-slate-500 py-8 text-xs">Nenhum cliente encontrado.</div>';
         return;
       }
 
-      grid.innerHTML = filtrados.map(c => `
+      grid.innerHTML = ordenados.map(c => `
         <div class="bg-exec-bg border border-exec-border rounded-xl p-4 flex flex-col justify-between space-y-3 hover:border-exec-gold/40 transition">
           <div>
             <h4 class="font-bold text-white text-xs truncate" title="${c.nome}">${c.nome}</h4>
