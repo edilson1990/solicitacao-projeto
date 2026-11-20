@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Executiva LED e Eventos — Painel Gerencial</title>
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23090b10'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='900' font-size='34' fill='%23e5be01'%3EE%3C/text%3E%3C/svg%3E">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -109,9 +110,12 @@
           <p id="login-error" class="text-rose-400 text-xs hidden font-medium bg-rose-950/40 border border-rose-800/50 rounded-xl p-3"></p>
         </div>
 
-        <div class="pt-6 mt-8 border-t border-exec-border flex items-center justify-center space-x-2 text-[11px] text-slate-500">
+        <!-- LOGO PROATIVA SOLUTIONS AMPLIADA E CLICÁVEL -->
+        <div class="pt-6 mt-8 border-t border-exec-border flex flex-col items-center justify-center space-y-2 text-[11px] text-slate-400">
           <span>Desenvolvido por</span>
-          <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-4 bg-white px-2 py-0.5 rounded shadow-sm">
+          <a href="https://proativasolutions.com.br" target="_blank" rel="noopener noreferrer" title="Acessar site Proativa Solutions" class="inline-flex items-center bg-white hover:bg-slate-100 px-4 py-2 rounded-xl shadow-md transition-transform duration-200 hover:scale-105">
+            <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-8 w-auto object-contain">
+          </a>
         </div>
       </div>
 
@@ -400,8 +404,11 @@
 
   </main>
 
-  <footer class="border-t border-exec-border bg-black py-4 px-6 text-center text-[11px] text-slate-500">
-    Desenvolvido por <strong class="text-slate-300">Proativa Solutions</strong> • Gestão Inteligente Executiva LED e Eventos
+  <footer class="border-t border-exec-border bg-black py-4 px-6 flex flex-col sm:flex-row items-center justify-center gap-2.5 text-[11px] text-slate-400">
+    <span>Gestão Inteligente Executiva LED e Eventos • Desenvolvido por</span>
+    <a href="https://proativasolutions.com.br" target="_blank" rel="noopener noreferrer" title="Acessar site Proativa Solutions" class="inline-flex items-center bg-white hover:bg-slate-100 px-3 py-1 rounded-lg shadow transition-transform duration-200 hover:scale-105">
+      <img src="https://lh3.googleusercontent.com/d/1GFRU1V94qSjwKeuJQqY_y3d0mEvnzsYO" alt="Proativa Solutions" class="h-5 w-auto object-contain">
+    </a>
   </footer>
 
   <script>
@@ -419,9 +426,49 @@
       materiais: { coluna: 'totalMovimentado', direcao: 'desc' }
     };
 
+    function atualizarFaviconExecutiva(base64Str) {
+      if (!base64Str) return;
+      const img = new Image();
+      img.onload = function() {
+        const size = 64;
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        const ctx = canvas.getContext('2d');
+
+        // Fundo arredondado preto com borda dourada sutil
+        ctx.fillStyle = '#090b10';
+        ctx.beginPath();
+        ctx.roundRect(0, 0, size, size, 14);
+        ctx.fill();
+
+        // Centraliza a logo mantendo proporção
+        const padding = 6;
+        const maxW = size - padding * 2;
+        const maxH = size - padding * 2;
+        const scale = Math.min(maxW / img.width, maxH / img.height);
+        const w = img.width * scale;
+        const h = img.height * scale;
+        ctx.drawImage(img, (size - w) / 2, (size - h) / 2, w, h);
+
+        let link = document.getElementById('favicon');
+        if (!link) {
+          link = document.createElement('link');
+          link.id = 'favicon';
+          link.rel = 'icon';
+          document.head.appendChild(link);
+        }
+        link.type = 'image/png';
+        link.href = canvas.toDataURL('image/png');
+      };
+      img.src = base64Str;
+    }
+
     function aplicarLogoNaTela(base64Str) {
       if (!base64Str) return;
       try { localStorage.setItem('executiva_logo_b64', base64Str); } catch (e) {}
+
+      atualizarFaviconExecutiva(base64Str);
 
       const loginImg = document.getElementById('login-logo-img');
       const loginFallback = document.getElementById('login-logo-fallback');
